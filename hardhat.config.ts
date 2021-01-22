@@ -7,6 +7,10 @@ import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
 
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (args, hre) => {
@@ -23,6 +27,17 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
+  // networks: {
+  //   hardhat: {
+  //     forking: {
+  //       url: process.env.FORKING_URL,
+  //       blockNumber: 22993569
+  //     }
+  //   }
+  // },
+  paths: {
+    artifacts: "./artifacts",
+  },
   react: {
     providerPriority: ["web3modal", "hardhat"],
   },
@@ -40,4 +55,5 @@ const config: HardhatUserConfig = {
     ],
   },
 };
+
 export default config;

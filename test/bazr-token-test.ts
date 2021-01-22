@@ -1,16 +1,19 @@
-import { ethers } from "hardhat";
-import { Signer } from "ethers";
+import * as hardhat from "hardhat";
+import { Contract, ContractFactory, Signer } from "ethers";
 import { assert, expect } from "chai";
 
 describe("Bazaar Token", function () {
-  let owner;
-  let BazrToken;
-  let bazrToken;
+  let owner: Signer;
+  let BazrToken: ContractFactory;
+  let bazrToken: Contract;
+
+  before(async () => {
+    [owner] = await hardhat.ethers.getSigners();
+    
+  });
 
   beforeEach(async function () {
-    [owner] = await ethers.getSigners();
-
-    BazrToken = await ethers.getContractFactory("BazrToken");
+    BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
 
     bazrToken = await BazrToken.deploy();
   });
