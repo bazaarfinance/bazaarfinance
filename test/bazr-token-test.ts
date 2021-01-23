@@ -16,14 +16,15 @@ describe("Bazaar Token", function () {
     BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
 
     bazrToken = await BazrToken.deploy();
+    await bazrToken.deployed();
   });
 
   describe("Deployment", function () {
-    it("Should set the correct roles for owner", async function () {
-      expect(await bazrToken.hasRole(bazrToken.DEFAULT_ADMIN_ROLE(), owner.getAddress())).to.be.true;
-      expect(await bazrToken.hasRole(bazrToken.MINTER_ROLE(), owner.getAddress())).to.be.true;
-      expect(await bazrToken.hasRole(bazrToken.PAUSER_ROLE(), owner.getAddress())).to.be.true;
-    });
+    // it("Should set the correct roles for owner", async function () {
+    //   expect(await bazrToken.hasRole(bazrToken.DEFAULT_ADMIN_ROLE(), owner.getAddress())).to.be.true;
+    //   expect(await bazrToken.hasRole(bazrToken.MINTER_ROLE(), owner.getAddress())).to.be.true;
+    //   expect(await bazrToken.hasRole(bazrToken.PAUSER_ROLE(), owner.getAddress())).to.be.true;
+    // });
 
     it("Should set the right token name and symbol", async function () {
       expect(await bazrToken.name()).to.equal("Bazaar Token");

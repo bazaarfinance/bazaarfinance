@@ -6,6 +6,7 @@ import "hardhat-deploy";
 import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
+import "@openzeppelin/hardhat-upgrades";
 
 import * as dotenv from "dotenv";
 
@@ -27,14 +28,14 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
-  // networks: {
-  //   hardhat: {
-  //     forking: {
-  //       url: process.env.FORKING_URL,
-  //       blockNumber: 22993569
-  //     }
-  //   }
-  // },
+  networks: {
+    hardhat: {
+      forking: {
+        url: process.env.FORKING_URL,
+        blockNumber: 11712717
+      }
+    }
+  },
   paths: {
     artifacts: "./artifacts",
   },
@@ -44,7 +45,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.7.3",
+        version: "0.6.12",
         settings: {
           optimizer: {
             enabled: true,

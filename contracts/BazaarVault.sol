@@ -1,9 +1,12 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.7.3;
+pragma solidity ^0.6.12;
 
 import "hardhat/console.sol";
 
-import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./interface/IBazrToken.sol";
 
 /*
  State variables from Miro: https://miro.com/app/board/o9J_lYIOBLw=/
@@ -22,27 +25,39 @@ import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
 
  Barebones class, noteably missing things like Ownable, proxy pattern for upgradeability, etc..
  */
-contract BazaarVault {
-    IERC20 dai;
-    IERC20 aDai;
-    ERC20PresetMinterPauser bazrToken;
-    address recipient;
-    address token;
-    uint256 salary;
+contract BazaarVault is Initializable, OwnableUpgradeSafe {
 
-    constructor(IERC20 _dai, IERC20 _aDai, ERC20PresetMinterPauser _bazrToken, address _recipient, uint256 _salary) {
+    using SafeMath for uint256;
+
+    IBazrToken bToken;
+    address dai;
+    address aDai;
+    address public recipient;
+    uint256 public goalAmount;
+
+    /***************
+    EVENTS
+    ***************/
+
+    /***************
+    FUNCTIONS
+    ***************/
+    /// @dev Creates a pool (proxy) which points to this logic contract
+    /// @param _dai address of the DAI stablecoin contract
+    /// @param _aDai address of the aDai interest-accruing token contract
+    /// @param _recipient address of the beneficiary
+    /// @param _goalAmount desired recipient payout for a given time period
+    /// @param _owner The address of the pool owner
+    function initialize(address _dai, address _aDai, address _recipient, uint256 _goalAmount, address _owner) public initializer {
+        __Ownable_init();
+        OwnableUpgradeSafe.transferOwnership(_owner);
         dai = _dai;
         aDai = _aDai;
-        bazrToken = _bazrToken;
         recipient = _recipient;
-        salary = _salary;
+        goalAmount = _goalAmount;
 
         // need payout frequency here as well I think
     }
-
-    //
-    // Events...
-    //
 
     function deposit(address depositor, uint256 amount) external {
         // assume that this contract is approved in the ERC-20 contract to spend caller tokens
@@ -52,7 +67,7 @@ contract BazaarVault {
         // updateExchangeRate()
         // bToken.mint(msg.sender, amount * exchangeRate)
 
-        bazrToken.mint(depositor, amount);
+        bToken.mint(depositor, amount);
     }
 
     function withdraw(address withdrawer, uint256 amount) external {
@@ -63,7 +78,7 @@ contract BazaarVault {
         // aToken.approve(address(pool), amount);
 
         // send 'amount' of dai back to withdrawer
-        bazrToken.burn(amount);
+        bToken.burn(withdrawer, amount);
     }
 
     function withdrawRecipient(uint256 amount) external {
@@ -74,7 +89,7 @@ contract BazaarVault {
         // aToken.approve(address(pool), amount);
 
         // send 'amount' of dai back to recipient
-        bazrToken.burn(amount);
+        bToken.burn(recipient, amount);
     }
 
     function updateExchangeRate() private {

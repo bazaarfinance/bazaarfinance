@@ -6,4 +6,5 @@ artifacts
 frontend/src/hardhat
 
 .env
+package-lock.json
 
