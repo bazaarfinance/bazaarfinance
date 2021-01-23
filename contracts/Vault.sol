@@ -9,7 +9,7 @@ import "./IMINTERC20.sol";
 
 contract Vault {
     // address of the recipient
-    address payable public recipient;
+    address public recipient;
 
     // external smart contracts
     ILendingPool public aavePool;
@@ -28,7 +28,7 @@ contract Vault {
     uint256 public recipientReserve;
     mapping(address=>uint256) public AddressToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
 
-   constructor(address payable _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken) public {
+   constructor(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken) public {
        recipient = _recipient;
        salary = _salary;
 
@@ -123,7 +123,7 @@ contract Vault {
                     return;  // we do nothing until the unallocated interest is more than salary
                 }
             } else {
-                depositorReserve += totalInterestEarned;
+                depositorReserve += totalInterestEarned - lastCheckpointInterest;
             }
         }
 
@@ -166,9 +166,9 @@ contract Vault {
     function btokenToToken(uint256 _principal,
                            uint256 _surplus,
                            uint256 _tokenSupply,
-                           uint256 btokens
+                           uint256 _btoken
                            ) pure public returns (uint256){
-        return SafeMath.div(SafeMath.mul(btokens, SafeMath.add(_surplus, _principal)), _tokenSupply);
+        return SafeMath.div(SafeMath.mul(_btoken, SafeMath.add(_surplus, _principal)), _tokenSupply);
     }
 
     // calculates btokens amount from tokens
