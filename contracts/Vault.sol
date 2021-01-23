@@ -5,9 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./ILendingPool.sol";
 import "./IMINTERC20.sol";
+import "./ExchangeRate.sol";
 
 
-contract Vault {
+contract Vault is ExchangeRate {
     // address of the recipient
     address public recipient;
 
@@ -22,6 +23,7 @@ contract Vault {
     uint256 public lastCheckpointInterest;  // last time the interest earned was measured
 
     bool public startedSurplus;
+    bool public depositMade;
 
     uint256 public principal;
     uint256 public depositorReserve;
@@ -58,15 +60,21 @@ contract Vault {
             address(this),
             0
         );
-
-        uint256 bTokensToMint = tokenToBtoken(
-            principal,
-            depositorReserve,
-            bToken.totalSupply(),
-            _amount
-        );
+        uint256 bTokensToMint;
+        if (depositMade) {
+            bTokensToMint = tokenToBtoken(
+                          principal,
+                          depositorReserve,
+                          bToken.totalSupply(),
+                          _amount
+            );
+        } else {
+            bTokensToMint = _amount; // first deposit always 1-1
+            depositMade = true;
+        }
         bToken.mint(msg.sender, bTokensToMint);
         AddressToPrincipal[msg.sender] += _amount;  // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
+        principal += _amount;
         updateCheckpointInterest();
     }
 
@@ -163,20 +171,4 @@ contract Vault {
         lastCheckpointInterest = totalInterestEarned;
     }
 
-    function btokenToToken(uint256 _principal,
-                           uint256 _surplus,
-                           uint256 _tokenSupply,
-                           uint256 _btoken
-                           ) pure public returns (uint256){
-        return SafeMath.div(SafeMath.mul(_btoken, SafeMath.add(_surplus, _principal)), _tokenSupply);
-    }
-
-    // calculates btokens amount from tokens
-    function tokenToBtoken(uint256 _principal,
-                           uint256 _surplus,
-                           uint256 _tokenSupply,
-                           uint256 _token
-                           ) pure public returns (uint256){
-        return SafeMath.div(SafeMath.mul(_token, (_tokenSupply)), SafeMath.add(_surplus, _principal));
-    }
 }

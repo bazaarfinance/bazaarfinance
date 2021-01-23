@@ -9,7 +9,6 @@ interface IMINTERC20 {
      * @dev Returns the amount of tokens in existence.
      */
     function totalSupply() external view returns (uint256);
-
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
@@ -60,7 +59,7 @@ interface IMINTERC20 {
      */
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
-    function mint(address recipient, uint256 amount) external returns (bool);
+    function mint(address recipient, uint256 amount) external;
     function burn(uint256 amount) external returns (bool);
 
     /**
