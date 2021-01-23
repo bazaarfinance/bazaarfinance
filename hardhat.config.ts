@@ -27,14 +27,24 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
-  // networks: {
-  //   hardhat: {
-  //     forking: {
-  //       url: process.env.FORKING_URL,
-  //       blockNumber: 22993569
-  //     }
-  //   }
-  // },
+  mocha: {
+    timeout: 10000,
+    rootHooks: {
+      beforeAll: function() {
+        this.DAI_CONTRACT_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+        this.ADAI_CONTRACT_ADDRESS = "0x028171bCA77440897B824Ca71D1c56caC55b68A3";
+
+        // fetch contracts here so they are only fetched once for all tests
+      }
+    }
+  },
+  networks: {
+    hardhat: {
+      forking: {
+        url: process.env.FORKING_URL
+      }
+    }
+  },
   paths: {
     artifacts: "./artifacts",
   },
