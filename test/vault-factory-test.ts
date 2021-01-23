@@ -1,13 +1,11 @@
 import * as hardhat from "hardhat";
 import { Contract, ContractFactory, Signer } from "ethers";
-import { assert, expect } from "chai";
-import { callbackify } from "util";
-import { joinSignature } from "ethers/lib/utils";
+import { expect } from "chai";
 
 const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 const aDaiAddress = "0x028171bCA77440897B824Ca71D1c56caC55b68A3";
 
-describe("Bazaar Vault Contract", function () {
+describe("Vault Factory", function () {
     let owner: Signer;
     let ownerAddress: string;
     
@@ -22,6 +20,12 @@ describe("Bazaar Vault Contract", function () {
     let VaultFactory: ContractFactory;
     let vaultFactory: Contract;
 
+    let newVaultAddress: string;
+    let newVault: Contract;
+
+    let newBTokenAddress: string;
+    let newBToken: Contract;
+
     let dai: Contract;
     let aDai: Contract;
 
@@ -30,11 +34,7 @@ describe("Bazaar Vault Contract", function () {
       ownerAddress = await owner.getAddress();
       recipientAddress = await recipient.getAddress();
 
-      dai = await hardhat.ethers.getContractAt("ERC20", "0x6b175474e89094c44da98b954eedeac495271d0f", owner);
-      
-      let daiName = await dai.name();
-      let daiSymbol = await dai.symbol();
-      
+      dai = await hardhat.ethers.getContractAt("ERC20", "0x6b175474e89094c44da98b954eedeac495271d0f", owner);      
       aDai = await hardhat.ethers.getContractAt("ERC20", "0x028171bCA77440897B824Ca71D1c56caC55b68A3");
     });
 
@@ -53,13 +53,19 @@ describe("Bazaar Vault Contract", function () {
     });
   
     describe("Deployment", function () {
-      it("Should set the correct BazrToken address", async function () {
-        // expect(await bazaar.bazrToken().getAddress()).to.equal(bazrToken.getAddress());
+      it("should return the correct reference implementation addresses", async function () {
+        expect(await vaultFactory.dai()).to.equal(daiAddress);
+        expect(await vaultFactory.aDai()).to.equal(aDaiAddress);
+        expect(await vaultFactory.vaultImplementation()).to.equal(bazaarVault.address);
+        expect(await vaultFactory.bTokenImplementation()).to.equal(bazrToken.address);
       });
-      it("Should set the correct owner address", async function () {
-        // const newVaultAddress = await vaultFactory.createVault(recipientAddress, salary);
-        // const newVault = await hardhat.ethers.getContractAt("BazaarVault", newVaultAddress, owner);
-        // expect(await newVault.owner()).to.equal(ownerAddress);
+      it("should initialize a new vault contract", async function () {
+        const newVaultAddress = await vaultFactory.createVault(recipientAddress, salary);
+        newVault = await hardhat.ethers.getContractAt("BazaarVault", newVaultAddress, owner);
+      });
+      it("should initialize a new bToken contract", async function () {
+        const newBTokenAddress = await vaultFactory.createBazrToken("BToken", "BZR");
+        newBToken = await hardhat.ethers.getContractAt("BazrToken", newBTokenAddress, owner);
       });
     });
   });
