@@ -11,8 +11,7 @@ contract MockERC20 is ERC20PresetMinterPauser {
         _mint(to, amount);
     }
 
-    /* function burn(uint256 amount) override external returns (bool){ */
-    /*     _burn(msg.sender, amount); */
-    /*     return true; */
-    /* } */
+    function burn(uint256 amount) override public {
+        _burn(msg.sender, amount);
+    }
 }

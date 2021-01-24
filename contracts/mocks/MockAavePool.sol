@@ -36,8 +36,8 @@ contract MockAavePool {
                       ) external returns (uint256) {
         withdrawn = true;
         require(asset == address(token));
-        atoken.transferFrom(msg.sender, address(0), amount);
-        token.transfer(msg.sender, amount);
+        atoken.transferFrom(msg.sender, address(this), amount);
+        token.transfer(to, amount);
         return 200;
     }
 }

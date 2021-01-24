@@ -23,7 +23,6 @@ contract Vault is ExchangeRate {
     uint256 public lastCheckpointInterest;  // last time the interest earned was measured
 
     bool public startedSurplus;
-    bool public depositMade;
 
     uint256 public principal;
     uint256 public depositorReserve;
@@ -69,7 +68,7 @@ contract Vault is ExchangeRate {
             0
         );
         uint256 bTokensToMint;
-        if (depositMade) {
+        if (depositorReserve > 0) {
             bTokensToMint = tokenToBtoken(
                           principal,
                           depositorReserve,
@@ -78,7 +77,6 @@ contract Vault is ExchangeRate {
             );
         } else {
             bTokensToMint = _amount; // first deposit always 1-1
-            depositMade = true;
         }
         bToken.mint(msg.sender, bTokensToMint);
         AddressToPrincipal[msg.sender] += _amount;  // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
@@ -92,17 +90,23 @@ contract Vault is ExchangeRate {
         // decrement user's principal, principal and depositorReserve;
         uint256 balance = bToken.balanceOf(msg.sender);
         bToken.transferFrom(msg.sender, address(this), balance);
-        uint256 atokenamount = btokenToToken(
-            principal,
-            depositorReserve,
-            bToken.totalSupply(),
-            balance
-        );
+        uint256 atokenamount;
+        if (depositorReserve > 0) {
+            atokenamount = btokenToToken(
+                principal,
+                depositorReserve,
+                bToken.totalSupply(),
+                balance
+            );
+        } else {
+            atokenamount = balance;
+        }
         depositorReserve -= (atokenamount - AddressToPrincipal[msg.sender]); // subtract principal from user's atokens to get the interests earned
         principal -= AddressToPrincipal[msg.sender];
         AddressToPrincipal[msg.sender] = 0;
         // withdraw atokens
         bToken.burn(balance);
+        aToken.approve(address(aavePool), atokenamount);
         aavePool.withdraw(
             address(token),
             atokenamount,
@@ -117,6 +121,7 @@ contract Vault is ExchangeRate {
         stateTransition();
         require(msg.sender == recipient);
         require(_amount <= recipientReserve);
+        aToken.approve(address(aavePool), _amount);
         recipientReserve -= _amount;
         aavePool.withdraw(
             address(token),
@@ -136,16 +141,13 @@ contract Vault is ExchangeRate {
                     recipientReserve += salary;  // gives salary to the recipientReserve
                     depositorReserve += ((totalInterestEarned - lastCheckpointInterest) - salary);  // send any leftover from salary to depositor
                     startedSurplus = true;  // set flag to true so that interest always go to depositorReserve from here on until we reach nextCheckpoint
-                }
-                if (totalInterestEarned - lastCheckpointInterest < salary ) { 
+                } else {
                     return;  // we do nothing until the unallocated interest is more than salary
                 }
             } else {
                 depositorReserve += totalInterestEarned - lastCheckpointInterest;
             }
-        }
-
-        if (block.timestamp >= nextCheckpoint){
+        } else {
             if (!startedSurplus) {
                 if (totalInterestEarned - lastCheckpointInterest >= salary) {
                     recipientReserve += salary;
@@ -173,11 +175,28 @@ contract Vault is ExchangeRate {
         updateCheckpointInterest();
     }
 
+    // calculate principal + interest earned by an address in atoken
+    function totalBalanceOf(address wallet) public view returns (uint256){
+        uint256 balance = bToken.balanceOf(wallet);
+        uint256 atokenamount;
+        if (depositorReserve > 0) {
+            atokenamount = btokenToToken(
+                principal,
+                depositorReserve,
+                bToken.totalSupply(),
+                balance
+            );
+        } else {
+            atokenamount = balance;
+        }
+        return atokenamount;
+    }
+
     // update last seen interests to the contract state
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
     function updateCheckpointInterest() private {
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal; 
+        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
         lastCheckpointInterest = totalInterestEarned;
     }
 

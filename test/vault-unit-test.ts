@@ -94,13 +94,11 @@ describe("Vault contract", function () {
       expect(bbalance.toString()).to.equal("1000")
       expect(balance.toString()).to.equal("1000")
 
-      let depositIsmade = await vault.depositMade();
       let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
       let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
       let lastCheckpointInterest = await vault.lastCheckpointInterest();
       expect(lastCheckpointInterest).to.equal("0");
-      expect(depositIsmade).to.true;
       expect(depositCalled).to.true;
       expect(principal).to.equal("1000");
       expect(depositorPrincipal).to.equal("1000");
@@ -110,8 +108,8 @@ describe("Vault contract", function () {
       let allow = await tokenWithSigner.allowance(depositor.address, vault.address);
       await vaultWithSigner.deposit("1000");
       let principal = await vault.principal();
-      let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
-      let depositorReserve = await vault.depositorReserve() 
+      let depositorPrincipal = await vault.AddressToPrincipal(depositor.address)
+      let depositorReserve = await vault.depositorReserve()
       let supply = await btoken.totalSupply();
       await atoken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
       await vaultWithSigner.deposit("1000"); // force state transition and return 909 btokens, exchange rate should change
