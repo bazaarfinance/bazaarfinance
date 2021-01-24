@@ -3,6 +3,7 @@ pragma solidity ^0.7.3;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
 
 /*
@@ -23,12 +24,11 @@ import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
  Barebones class, noteably missing things like Ownable, proxy pattern for upgradeability, etc..
  */
 contract BazaarVault {
-    IERC20 dai;
-    IERC20 aDai;
-    ERC20PresetMinterPauser bazrToken;
-    address recipient;
-    address token;
-    uint256 salary;
+    IERC20 public dai;
+    IERC20 public aDai;
+    ERC20PresetMinterPauser public bazrToken;
+    address public recipient;
+    uint256 public salary;
 
     constructor(IERC20 _dai, IERC20 _aDai, ERC20PresetMinterPauser _bazrToken, address _recipient, uint256 _salary) {
         dai = _dai;
@@ -38,6 +38,16 @@ contract BazaarVault {
         salary = _salary;
 
         // need payout frequency here as well I think
+
+        console.log('vault contract contructor: msg.sender = ');
+
+        // bazrToken.grantRole(bazrToken.MINTER_ROLE(), address(this));
+        // bazrToken.grantRole(bazrToken.PAUSER_ROLE(), address(this));
+
+        // bazrToken.revokeRole(bazrToken.MINTER_ROLE(), msg.sender);
+        // bazrToken.revokeRole(bazrToken.PAUSER_ROLE(), msg.sender);
+
+        // bazrToken.approve(address(this), amount);
     }
 
     //
