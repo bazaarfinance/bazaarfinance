@@ -1,18 +1,18 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.7.3;
 
-import "../IMINTERC20.sol";
+import "../BazrToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockAavePool {
     bool public deposited;
     bool public withdrawn;
 
-    IMINTERC20 atoken;
+    BazrToken atoken;
     IERC20 token;
 
     constructor (address _token, address _atoken) {
-        atoken = IMINTERC20(_atoken);
+        atoken = BazrToken(_atoken);
         token = IERC20(_token);
     }
 

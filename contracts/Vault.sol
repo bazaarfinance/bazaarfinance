@@ -4,7 +4,7 @@ pragma solidity ^0.7.3;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./ILendingPool.sol";
-import "./IMINTERC20.sol";
+import "./BazrToken.sol";
 import "./ExchangeRate.sol";
 
 
@@ -16,7 +16,7 @@ contract Vault is ExchangeRate {
     ILendingPool public aavePool;
     IERC20 public token;
     IERC20 public aToken;
-    IMINTERC20 public bToken;  // btokens should be mintable
+    BazrToken public bToken;  // btokens should be mintable
 
     uint256 public salary;
     uint256 public nextCheckpoint;
@@ -35,7 +35,7 @@ contract Vault is ExchangeRate {
        salary = _salary;
 
        token = IERC20(_token);
-       bToken = IMINTERC20(_bToken);
+       bToken = BazrToken(_bToken);
        aToken = IERC20(_aToken);
        aavePool = ILendingPool(_aavePool);
 

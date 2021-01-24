@@ -10,6 +10,9 @@ describe("Vault contract", function () {
   let token;
   let atoken;
   let btoken;
+  let vaultFactory;
+  let vaultTx;
+  let vault;
 
   beforeEach(async function() {
     accounts = await ethers.getSigners();
@@ -27,21 +30,20 @@ describe("Vault contract", function () {
     let AavePooltx = await AavePoolFactory.deploy(token.address, atoken.address);
     aavePool = await AavePooltx.deployed()
 
+    vaultFactory = await ethers.getContractFactory("Vault");
+    vaultTx = await vaultFactory.deploy(
+      recipient.address,
+      token.address,
+      aavePool.address,
+      "1000",
+      btoken.address,
+      atoken.address,
+    );
+    vault = await vaultTx.deployed();
   })
 
   describe("constructor", function () {
     it("should initialize all correct address and values", async function () {
-      let vaultFactory = await ethers.getContractFactory("Vault");
-      let vaultTx = await vaultFactory.deploy(
-        recipient.address,
-        token.address,
-        aavePool.address,
-        "1000",
-        btoken.address,
-        atoken.address,
-      );
-
-      let vault = await vaultTx.deployed();
       let crecipient = await vault.recipient();
       let csalary = await vault.salary();
       let caavePool = await vault.aavePool();
@@ -71,23 +73,18 @@ describe("Vault contract", function () {
   })
 
   describe("deposit", function () {
-    it("should successfully make deposit", async function () {
-      let vaultFactory = await ethers.getContractFactory("Vault");
-      let vaultTx = await vaultFactory.deploy(
-        recipient.address,
-        token.address,
-        aavePool.address,
-        "1000",
-        btoken.address,
-        atoken.address,
-      );
+    let vaultWithSigner
+    let tokenWithSigner
 
-      let vault = await vaultTx.deployed();
-      let vaultWithSigner = vault.connect(depositor);
-      let tokenWithSigner = token.connect(depositor);
-      await tokenWithSigner.mint(depositor.address, "1000");
-
+    beforeEach(async function () {
+      vaultWithSigner = vault.connect(depositor);
+      tokenWithSigner = token.connect(depositor);
+      await tokenWithSigner.mint(depositor.address, "10000");
       await tokenWithSigner.approve(vault.address, "10000");
+    })
+
+
+    it("should successfully make deposit", async function () {
       let allow = await tokenWithSigner.allowance(depositor.address, vault.address);
       await vaultWithSigner.deposit("1000");
       let balance = await token.balanceOf(aavePool.address);
@@ -96,15 +93,30 @@ describe("Vault contract", function () {
       expect(abalance.toString()).to.equal("1000")
       expect(bbalance.toString()).to.equal("1000")
       expect(balance.toString()).to.equal("1000")
+
       let depositIsmade = await vault.depositMade();
+      let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
       let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
       let lastCheckpointInterest = await vault.lastCheckpointInterest();
       expect(lastCheckpointInterest).to.equal("0");
-      expect(depositIsmade).to.equal(true);
+      expect(depositIsmade).to.true;
+      expect(depositCalled).to.true;
       expect(principal).to.equal("1000");
       expect(depositorPrincipal).to.equal("1000");
+    })
 
+    it("should return the correct amount of btoken after first deposit", async function () {
+      let allow = await tokenWithSigner.allowance(depositor.address, vault.address);
+      await vaultWithSigner.deposit("1000");
+      let principal = await vault.principal();
+      let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
+      let depositorReserve = await vault.depositorReserve() 
+      let supply = await btoken.totalSupply();
+      await atoken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
+      await vaultWithSigner.deposit("1000"); // force state transition and return 909 btokens, exchange rate should change
+      let bbalance = await btoken.balanceOf(depositor.address);
+      expect(bbalance).to.equal("1909");
     })
   })
 })
