@@ -9,16 +9,16 @@ import "./ExchangeRate.sol";
 
 
 contract Vault is ExchangeRate {
-    // address of the recipient
+    /// @dev Vault parameters.
     address public recipient;
+    uint256 public salary;
 
-    // external smart contracts
+    /// @dev Associated external smart contracts. 
     ILendingPool public aavePool;
     IERC20 public token;
     IERC20 public aToken;
     BazrToken public bToken;  // btokens should be mintable
 
-    uint256 public salary;
     uint256 public nextCheckpoint;
     uint256 public lastCheckpointInterest;  // last time the interest earned was measured
 
@@ -30,7 +30,14 @@ contract Vault is ExchangeRate {
     uint256 public recipientReserve;
     mapping(address=>uint256) public AddressToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
 
-   constructor(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken) public {
+
+   /// @param _recipient The address of the recipient.
+   /// @param _token The hexadecimal address of the salary and endowment token. 
+   /// @param _aavePool The Aave pool generating interest.
+   /// @param _salary The salary targeted for the recipient.
+   /// @param _bToken The hexadecimal address of the associated bToken.
+   /// @param _aToken The hexadecimal address of the associated aToken.
+   constructor(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken)  {
        recipient = _recipient;
        salary = _salary;
 
@@ -48,7 +55,8 @@ contract Vault is ExchangeRate {
        startedSurplus = false;
    }
 
-    // deposit tokens into aave pool and mint equivalent in bTokens
+    /// @notice Deposits `_amount` of `token` into Aave pool and mints equivalent bTokens. 
+    /// @param _amount The amount to deposit.
     function deposit(uint256 _amount) public {
         stateTransition();
 
@@ -78,7 +86,7 @@ contract Vault is ExchangeRate {
         updateCheckpointInterest();
     }
 
-    // withdraw out the user's entire balance
+    /// @notice Withdraws the user's entire balance. 
     function withdraw() public {
         stateTransition();
         // decrement user's principal, principal and depositorReserve;
@@ -103,6 +111,8 @@ contract Vault is ExchangeRate {
         updateCheckpointInterest();
     }
 
+    /// @notice Withdraws salary to recipient address. Only callable by `recipient`.
+    /// @param _amount The amount to withdraw.
     function recipientWithdraw(uint256 _amount) public {
         stateTransition();
         require(msg.sender == recipient);
