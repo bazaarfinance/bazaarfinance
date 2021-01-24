@@ -1,20 +1,17 @@
 import * as hardhat from "hardhat";
 import { Contract, ContractFactory, Signer } from "ethers";
-import { assert, expect } from "chai";
-import { callbackify } from "util";
-import { joinSignature } from "ethers/lib/utils";
-import { unzipSync } from "zlib";
+import { expect } from "chai";
 
 describe("Bazaar Vault Contract", function () {
-    let owner: Signer;
-    let ownerAddress: string;
-    
+    let deployer: Signer;
     let recipient: Signer;
-    let recipientAddress: string;
+
     let salary: number = 1000;
 
     let BazrToken: ContractFactory;
     let bazrToken: Contract;
+    let bazrTokenAddress: string;
+
     let BazaarVault: ContractFactory;
     let bazaarVault: Contract;
 
@@ -24,19 +21,28 @@ describe("Bazaar Vault Contract", function () {
     });
 
     beforeEach(async function () {
-        // BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
-        // bazrToken = await BazrToken.deploy();
-    
-        // BazaarVault = await hardhat.ethers.getContractFactory("BazaarVault");
+        [deployer, recipient] = await hardhat.ethers.getSigners();
 
-        // bazaarVault = await BazaarVault.deploy(dai, aDai, bazrToken, recipientAddress, salary);
+        BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
+        bazrToken = await BazrToken.deploy();
+    
+        BazaarVault = await hardhat.ethers.getContractFactory("BazaarVault");
+
+        let recipientAddress = await recipient.getAddress();
+
+        bazaarVault = await BazaarVault.deploy(this.DAI_CONTRACT_ADDRESS, this.ADAI_CONTRACT_ADDRESS, bazrToken.address, recipientAddress, salary);
     });
   
     describe("Deployment", function () {
-      it("Should set the correct BazrToken address", async function () {
-        // expect(await bazaar.bazrToken().getAddress()).to.equal(bazrToken.getAddress());
+      it("Should set the correct BazrToken address and permissions", async function () {
+        let vaultBazrToken = await bazaarVault.bazrToken();
+
+        expect(vaultBazrToken).to.equal(bazrToken.address);
+
+        //
+        // test that vault has correct roles on token
+        //
       });
     });
   });
-  
   
