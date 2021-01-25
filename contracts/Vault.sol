@@ -27,7 +27,7 @@ contract Vault is ExchangeRate {
     uint256 public principal;
     uint256 public depositorReserve;
     uint256 public recipientReserve;
-    mapping(address=>uint256) public AddressToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
+    mapping(address=>uint256) public depositorToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
 
 
    /// @param _recipient The address of the recipient.
@@ -79,8 +79,8 @@ contract Vault is ExchangeRate {
             bTokensToMint = _amount; // first deposit always 1-1
         }
         bToken.mint(msg.sender, bTokensToMint);
-        AddressToPrincipal[msg.sender] += _amount;  // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
-        principal += _amount;
+        depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
+        // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
         updateCheckpointInterest();
     }
 
@@ -90,26 +90,30 @@ contract Vault is ExchangeRate {
         // decrement user's principal, principal and depositorReserve;
         uint256 balance = bToken.balanceOf(msg.sender);
         bToken.transferFrom(msg.sender, address(this), balance);
-        uint256 atokenamount;
+        uint256 aTokenAmount;
         if (depositorReserve > 0) {
-            atokenamount = btokenToToken(
+            aTokenAmount = btokenToToken(
                 principal,
                 depositorReserve,
                 bToken.totalSupply(),
                 balance
             );
         } else {
-            atokenamount = balance;
+            aTokenAmount = balance;
         }
-        depositorReserve -= (atokenamount - AddressToPrincipal[msg.sender]); // subtract principal from user's atokens to get the interests earned
-        principal -= AddressToPrincipal[msg.sender];
-        AddressToPrincipal[msg.sender] = 0;
+
+        depositorReserve = SafeMath.sub(
+            depositorReserve, 
+            SafeMath.sub(aTokenAmount, depositorToPrincipal[msg.sender])
+            );
+        principal = SafeMath.sub(principal, depositorToPrincipal[msg.sender]);
+        depositorToPrincipal[msg.sender] = 0;
         // withdraw atokens
         bToken.burn(balance);
-        aToken.approve(address(aavePool), atokenamount);
+        aToken.approve(address(aavePool), aTokenAmount);
         aavePool.withdraw(
             address(token),
-            atokenamount,
+            aTokenAmount,
             msg.sender
         );
         updateCheckpointInterest();
@@ -122,7 +126,7 @@ contract Vault is ExchangeRate {
         require(msg.sender == recipient);
         require(_amount <= recipientReserve);
         aToken.approve(address(aavePool), _amount);
-        recipientReserve -= _amount;
+        recipientReserve = SafeMath.sub(recipientReserve, _amount);
         aavePool.withdraw(
             address(token),
             _amount,
@@ -137,27 +141,49 @@ contract Vault is ExchangeRate {
         uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
         if (block.timestamp < nextCheckpoint){
             if (!startedSurplus) {
+                /* Check if interest earned exceeds salary. If true, adds salary to recipient reserve and any surplus to depositor reserve. */
                 if (totalInterestEarned - lastCheckpointInterest >= salary) {
-                    recipientReserve += salary;  // gives salary to the recipientReserve
-                    depositorReserve += ((totalInterestEarned - lastCheckpointInterest) - salary);  // send any leftover from salary to depositor
-                    startedSurplus = true;  // set flag to true so that interest always go to depositorReserve from here on until we reach nextCheckpoint
+                    recipientReserve = SafeMath.add(recipientReserve, salary);
+                    depositorReserve = SafeMath.add(
+                        depositorReserve, 
+                        SafeMath.sub(
+                            SafeMath.sub(
+                                totalInterestEarned,
+                                lastCheckpointInterest
+                            ), salary));
+                    startedSurplus = true;  /* Set flag to true to direct interest to depositor reserver until next checkpoint */
                 } else {
-                    return;  // we do nothing until the unallocated interest is more than salary
+                    /* Do nothing until the unallocated interest exceeds the salary */ 
+                    return; 
                 }
             } else {
-                depositorReserve += totalInterestEarned - lastCheckpointInterest;
+                depositorReserve = SafeMath.add(
+                    depositorReserve,
+                    SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                    );
             }
         } else {
             if (!startedSurplus) {
                 if (totalInterestEarned - lastCheckpointInterest >= salary) {
-                    recipientReserve += salary;
-                    depositorReserve += ((totalInterestEarned - lastCheckpointInterest) - salary);
-                }
+                    recipientReserve = SafeMath.add(recipientReserve, salary);
+                    depositorReserve = SafeMath.add(
+                        depositorReserve, 
+                        SafeMath.sub(
+                            SafeMath.sub(
+                                totalInterestEarned,
+                                lastCheckpointInterest
+                            ), salary));                }
                 if (totalInterestEarned - lastCheckpointInterest < salary ) {
-                    recipientReserve += (totalInterestEarned - lastCheckpointInterest);  // if we never reached target salary, give all interests to recipient
+                    recipientReserve = SafeMath.add(
+                        recipientReserve, 
+                        SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                        );
                 }
             } else {
-                depositorReserve += totalInterestEarned - lastCheckpointInterest;  // assuming salary is already allocated to recipient, give interests to
+                depositorReserve = SafeMath.add(
+                    depositorReserve,
+                    SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                );
             }
             reset();  // always reset when current time is higher than checkpoint
         }
