@@ -58,14 +58,14 @@ describe("Vault contract", function () {
       expect(ctoken).to.equal(token.address);
 
       let nextCheckpoint = await vault.nextCheckpoint();
-      let lastCheckpointInterest = await vault.lastCheckpointInterest();
+      let interestEarnedAtLastCheckpoint = await vault.interestEarnedAtLastCheckpoint();
       let startedSurplus = await vault.startedSurplus();
       let principal = await vault.principal();
       let depositorReserve = await vault.depositorReserve();
       let recipientReserve = await vault.recipientReserve();
       expect(parseInt(nextCheckpoint)).to.gt(ethers.provider.blockNumber + 216000 ); // approx number of blocks in 30 days
       expect(startedSurplus).to.equal(false);
-      expect(lastCheckpointInterest).to.equal("0");
+      expect(interestEarnedAtLastCheckpoint).to.equal("0");
       expect(principal).to.equal("0");
       expect(depositorReserve).to.equal("0");
       expect(recipientReserve).to.equal("0");
@@ -97,8 +97,8 @@ describe("Vault contract", function () {
       let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
       let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
-      let lastCheckpointInterest = await vault.lastCheckpointInterest();
-      expect(lastCheckpointInterest).to.equal("0");
+      let interestEarnedAtLastCheckpoint = await vault.interestEarnedAtLastCheckpoint();
+      expect(interestEarnedAtLastCheckpoint).to.equal("0");
       expect(depositCalled).to.true;
       expect(principal).to.equal("1000");
       expect(depositorPrincipal).to.equal("1000");
