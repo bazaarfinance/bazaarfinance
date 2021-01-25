@@ -96,6 +96,7 @@ contract Vault is ExchangeRate {
         }
         bToken.mint(msg.sender, bTokensToMint);
         depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
+        principal = SafeMath.add(principal, _amount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
         _updateCheckpointInterest();
         emit NewDeposit(msg.sender, _amount);
@@ -191,7 +192,7 @@ contract Vault is ExchangeRate {
                 if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
                     recipientReserve = SafeMath.add(recipientReserve, salary);
                     depositorReserve = SafeMath.add(
-                        depositorReserve, 
+                        depositorReserve,
                         SafeMath.sub(
                             SafeMath.sub(
                                 totalInterestEarned,
