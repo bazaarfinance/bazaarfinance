@@ -96,7 +96,7 @@ describe("Vault contract", function () {
 
       let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
-      let depositorPrincipal = await vault.AddressToPrincipal(depositor.address) 
+      let depositorPrincipal = await vault.depositorToPrincipal(depositor.address) 
       let interestEarnedAtLastCheckpoint = await vault.interestEarnedAtLastCheckpoint();
       expect(interestEarnedAtLastCheckpoint).to.equal("0");
       expect(depositCalled).to.true;
@@ -108,7 +108,7 @@ describe("Vault contract", function () {
       let allow = await tokenWithSigner.allowance(depositor.address, vault.address);
       await vaultWithSigner.deposit("1000");
       let principal = await vault.principal();
-      let depositorPrincipal = await vault.AddressToPrincipal(depositor.address)
+      let depositorPrincipal = await vault.depositorToPrincipal(depositor.address)
       let depositorReserve = await vault.depositorReserve()
       let supply = await btoken.totalSupply();
       await atoken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
