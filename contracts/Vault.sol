@@ -20,7 +20,7 @@ contract Vault is ExchangeRate {
     BazrToken public bToken;  // btokens should be mintable
 
     uint256 public nextCheckpoint;
-    uint256 public lastCheckpointInterest;  // last time the interest earned was measured
+    uint256 public interestEarnedAtLastCheckpoint;  // last time the interest earned was measured
 
     bool public startedSurplus;
 
@@ -46,7 +46,7 @@ contract Vault is ExchangeRate {
        aavePool = ILendingPool(_aavePool);
 
        nextCheckpoint = block.timestamp + 30 days;  // hardcoded 30 days for now
-       lastCheckpointInterest = 0;
+       interestEarnedAtLastCheckpoint = 0;
 
        depositorReserve = 0;
        recipientReserve = 0;
@@ -136,20 +136,20 @@ contract Vault is ExchangeRate {
     }
 
     function stateTransition() private {
-        // totalInterestEarned should always be >= to lastCheckpointInterest
-        // totalInterestEarned - lastCheckpointInterest will give us the interests we need to allocate
+        // totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
+        // totalInterestEarned - interestEarnedAtLastCheckpoint will give us the interests we need to allocate
         uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
         if (block.timestamp < nextCheckpoint){
             if (!startedSurplus) {
                 /* Check if interest earned exceeds salary. If true, adds salary to recipient reserve and any surplus to depositor reserve. */
-                if (totalInterestEarned - lastCheckpointInterest >= salary) {
+                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
                     recipientReserve = SafeMath.add(recipientReserve, salary);
                     depositorReserve = SafeMath.add(
                         depositorReserve, 
                         SafeMath.sub(
                             SafeMath.sub(
                                 totalInterestEarned,
-                                lastCheckpointInterest
+                                interestEarnedAtLastCheckpoint
                             ), salary));
                     startedSurplus = true;  /* Set flag to true to direct interest to depositor reserver until next checkpoint */
                 } else {
@@ -159,30 +159,30 @@ contract Vault is ExchangeRate {
             } else {
                 depositorReserve = SafeMath.add(
                     depositorReserve,
-                    SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
                     );
             }
         } else {
             if (!startedSurplus) {
-                if (totalInterestEarned - lastCheckpointInterest >= salary) {
+                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
                     recipientReserve = SafeMath.add(recipientReserve, salary);
                     depositorReserve = SafeMath.add(
                         depositorReserve, 
                         SafeMath.sub(
                             SafeMath.sub(
                                 totalInterestEarned,
-                                lastCheckpointInterest
+                                interestEarnedAtLastCheckpoint
                             ), salary));                }
-                if (totalInterestEarned - lastCheckpointInterest < salary ) {
+                if (totalInterestEarned - interestEarnedAtLastCheckpoint < salary ) {
                     recipientReserve = SafeMath.add(
                         recipientReserve, 
-                        SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                        SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
                         );
                 }
             } else {
                 depositorReserve = SafeMath.add(
                     depositorReserve,
-                    SafeMath.sub(totalInterestEarned, lastCheckpointInterest)
+                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
                 );
             }
             reset();  // always reset when current time is higher than checkpoint
@@ -223,7 +223,7 @@ contract Vault is ExchangeRate {
     // so that all unallocated interests is always positive
     function updateCheckpointInterest() private {
         uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
-        lastCheckpointInterest = totalInterestEarned;
+        interestEarnedAtLastCheckpoint = totalInterestEarned;
     }
 
 }
