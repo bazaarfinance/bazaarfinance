@@ -104,13 +104,7 @@ describe("Vault contract", function () {
 
       let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
-<<<<<<< HEAD
       let depositorPrincipal = await vault.depositorToPrincipal(depositor.address) 
-=======
-      let depositorPrincipal = await vault.depositorToPrincipal(
-        depositor.address
-      );
->>>>>>> 94941a48f290956383158eab3369781401f31ae8
       let interestEarnedAtLastCheckpoint = await vault.interestEarnedAtLastCheckpoint();
       expect(interestEarnedAtLastCheckpoint).to.equal("0");
       expect(depositCalled).to.true;
@@ -123,25 +117,13 @@ describe("Vault contract", function () {
         depositor.address,
         vault.address
       );
-      await vaultWithSigner.deposit("1000");
       let principal = await vault.principal();
-<<<<<<< HEAD
       let depositorPrincipal = await vault.depositorToPrincipal(depositor.address)
       let depositorReserve = await vault.depositorReserve()
       let supply = await btoken.totalSupply();
       await atoken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
       await vaultWithSigner.deposit("1000"); // force state transition and return 909 btokens, exchange rate should change
       let bbalance = await btoken.balanceOf(depositor.address);
-=======
-      let depositorPrincipal = await vault.depositorToPrincipal(
-        depositor.address
-      );
-      let depositorReserve = await vault.depositorReserve();
-      let supply = await bToken.totalSupply();
-      await aToken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
-      await vaultWithSigner.deposit("1000"); // force state transition and return 909 bTokens, exchange rate should change
-      let bbalance = await bToken.balanceOf(depositor.address);
->>>>>>> 94941a48f290956383158eab3369781401f31ae8
       expect(bbalance).to.equal("1909");
     });
   });
