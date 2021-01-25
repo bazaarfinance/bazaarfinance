@@ -29,6 +29,10 @@ contract Vault is ExchangeRate {
     uint256 public recipientReserve;
     mapping(address=>uint256) public depositorToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
 
+    event NewDeposit(address indexed depositor, uint256 indexed amount);
+    event RecipientWithdraw(uint256 indexed amount);
+    event DepositorWithdraw(address indexed depositor, uint256 indexed amount);
+
 
    /// @param _recipient The address of the recipient.
    /// @param _token The hexadecimal address of the salary and endowment token. 
@@ -82,6 +86,7 @@ contract Vault is ExchangeRate {
         depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
         _updateCheckpointInterest();
+        emit NewDeposit(msg.sender, _amount);
     }
 
     /// @notice Withdraws the user's entire balance. 
@@ -117,6 +122,7 @@ contract Vault is ExchangeRate {
             msg.sender
         );
         _updateCheckpointInterest();
+        emit DepositorWithdraw(msg.sender, aTokenAmount);
     }
 
     /// @notice Withdraws salary to recipient address. Only callable by `recipient`.
@@ -133,6 +139,7 @@ contract Vault is ExchangeRate {
             recipient
         );
         _updateCheckpointInterest();
+        emit RecipientWithdraw(_amount);
     }
 
     /// @notice Calculates the principal plus interest earned by _address in aTokens.
