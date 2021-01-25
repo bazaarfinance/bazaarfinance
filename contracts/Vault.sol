@@ -57,7 +57,7 @@ contract Vault is ExchangeRate {
     /// @notice Deposits `_amount` of `token` into Aave pool and mints equivalent bTokens. 
     /// @param _amount The amount to deposit.
     function deposit(uint256 _amount) public {
-        stateTransition();
+        _stateTransition();
 
         token.transferFrom(msg.sender, address(this), _amount);
         token.approve(address(aavePool), _amount);
@@ -81,12 +81,12 @@ contract Vault is ExchangeRate {
         bToken.mint(msg.sender, bTokensToMint);
         depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
-        updateCheckpointInterest();
+        _updateCheckpointInterest();
     }
 
     /// @notice Withdraws the user's entire balance. 
     function withdraw() public {
-        stateTransition();
+        _stateTransition();
         // decrement user's principal, principal and depositorReserve;
         uint256 balance = bToken.balanceOf(msg.sender);
         bToken.transferFrom(msg.sender, address(this), balance);
@@ -116,13 +116,13 @@ contract Vault is ExchangeRate {
             aTokenAmount,
             msg.sender
         );
-        updateCheckpointInterest();
+        _updateCheckpointInterest();
     }
 
     /// @notice Withdraws salary to recipient address. Only callable by `recipient`.
     /// @param _amount The amount to withdraw.
     function recipientWithdraw(uint256 _amount) public {
-        stateTransition();
+        _stateTransition();
         require(msg.sender == recipient);
         require(_amount <= recipientReserve);
         aToken.approve(address(aavePool), _amount);
@@ -132,10 +132,36 @@ contract Vault is ExchangeRate {
             _amount,
             recipient
         );
-        updateCheckpointInterest();
+        _updateCheckpointInterest();
     }
 
-    function stateTransition() private {
+    /// @notice Calculates the principal plus interest earned by _address in aTokens.
+    /// @param _address The address to query the balance for. 
+    function totalBalanceOf(address _address) public view returns (uint256){
+        uint256 balance = bToken.balanceOf(_address);
+        uint256 atokenamount;
+        if (depositorReserve > 0) {
+            atokenamount = btokenToToken(
+                principal,
+                depositorReserve,
+                bToken.totalSupply(),
+                balance
+            );
+        } else {
+            atokenamount = balance;
+        }
+        return atokenamount;
+    }
+
+    /// @notice Convenience function to execute a state transition.
+    function manualTransition() public {
+        _stateTransition();
+        _updateCheckpointInterest();
+    }
+
+
+
+    function _stateTransition() private {
         // totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
         // totalInterestEarned - interestEarnedAtLastCheckpoint will give us the interests we need to allocate
         uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
@@ -185,43 +211,21 @@ contract Vault is ExchangeRate {
                     SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
                 );
             }
-            reset();  // always reset when current time is higher than checkpoint
+            _reset();  // always _reset when current time is higher than checkpoint
         }
     }
 
-    function reset() private {
+    function _reset() private {
         nextCheckpoint = block.timestamp + 30 days;  // hardcoded 30 days for now
         startedSurplus = false;
     }
 
-    // update the state manually at the end of the checkpoint
-    // must also update the checkpoint interest
-    function manualTransition() public {
-        stateTransition();
-        updateCheckpointInterest();
-    }
 
-    // calculate principal + interest earned by an address in atoken
-    function totalBalanceOf(address wallet) public view returns (uint256){
-        uint256 balance = bToken.balanceOf(wallet);
-        uint256 atokenamount;
-        if (depositorReserve > 0) {
-            atokenamount = btokenToToken(
-                principal,
-                depositorReserve,
-                bToken.totalSupply(),
-                balance
-            );
-        } else {
-            atokenamount = balance;
-        }
-        return atokenamount;
-    }
 
     // update last seen interests to the contract state
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
-    function updateCheckpointInterest() private {
+    function _updateCheckpointInterest() private {
         uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
         interestEarnedAtLastCheckpoint = totalInterestEarned;
     }
