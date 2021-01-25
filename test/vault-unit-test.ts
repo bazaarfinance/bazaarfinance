@@ -1,7 +1,10 @@
 import { ethers } from "hardhat";
-import { Contract, ContractFactory } from "ethers";
+import { Contract, ContractFactory, Signer } from "ethers";
 import { expect } from "chai";
-import { SignerWithAddress } from "hardhat-deploy-ethers/dist/src/signer-with-address";
+
+interface SignerWithAddress extends Signer {
+  address: string;
+};
 
 describe("Vault contract", function () {
   let accounts: SignerWithAddress[];
@@ -104,7 +107,9 @@ describe("Vault contract", function () {
 
       let depositCalled = await aavePool.deposited();
       let principal = await vault.principal();
-      let depositorPrincipal = await vault.depositorToPrincipal(depositor.address) 
+      let depositorPrincipal = await vault.depositorToPrincipal(
+        depositor.address
+      );
       let interestEarnedAtLastCheckpoint = await vault.interestEarnedAtLastCheckpoint();
       expect(interestEarnedAtLastCheckpoint).to.equal("0");
       expect(depositCalled).to.true;
@@ -117,13 +122,16 @@ describe("Vault contract", function () {
         depositor.address,
         vault.address
       );
+      await vaultWithSigner.deposit("1000");
       let principal = await vault.principal();
-      let depositorPrincipal = await vault.depositorToPrincipal(depositor.address)
-      let depositorReserve = await vault.depositorReserve()
-      let supply = await btoken.totalSupply();
-      await atoken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
-      await vaultWithSigner.deposit("1000"); // force state transition and return 909 btokens, exchange rate should change
-      let bbalance = await btoken.balanceOf(depositor.address);
+      let depositorPrincipal = await vault.depositorToPrincipal(
+        depositor.address
+      );
+      let depositorReserve = await vault.depositorReserve();
+      let supply = await bToken.totalSupply();
+      await aToken.mint(vault.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
+      await vaultWithSigner.deposit("1000"); // force state transition and return 909 bTokens, exchange rate should change
+      let bbalance = await bToken.balanceOf(depositor.address);
       expect(bbalance).to.equal("1909");
     });
   });
