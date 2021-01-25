@@ -8,7 +8,12 @@ import "./BazrToken.sol";
 import "./ExchangeRate.sol";
 
 
+
 contract Vault is ExchangeRate {
+    /***************
+    STATE VARIABLES
+    ***************/
+
     /// @dev Vault parameters.
     address public recipient;
     uint256 public salary;
@@ -29,10 +34,17 @@ contract Vault is ExchangeRate {
     uint256 public recipientReserve;
     mapping(address=>uint256) public depositorToPrincipal;  // keep track of the principal of every depositors to calculate withdraws
 
+    /***************
+    EVENTS
+    ***************/
+
     event NewDeposit(address indexed depositor, uint256 indexed amount);
     event RecipientWithdraw(uint256 indexed amount);
     event DepositorWithdraw(address indexed depositor, uint256 indexed amount);
 
+    /***************
+    FUNCTIONS
+    ***************/
 
    /// @param _recipient The address of the recipient.
    /// @param _token The hexadecimal address of the salary and endowment token. 
@@ -144,6 +156,7 @@ contract Vault is ExchangeRate {
 
     /// @notice Calculates the principal plus interest earned by _address in aTokens.
     /// @param _address The address to query the balance for. 
+    /// @return Balance of the _address in aTokens.
     function totalBalanceOf(address _address) public view returns (uint256){
         uint256 balance = bToken.balanceOf(_address);
         uint256 atokenamount;
