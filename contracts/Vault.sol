@@ -220,8 +220,6 @@ contract Vault is ExchangeRate {
         startedSurplus = false;
     }
 
-
-
     // update last seen interests to the contract state
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
