@@ -39,8 +39,6 @@ contract BazaarVault {
 
         // need payout frequency here as well I think
 
-        console.log('vault contract contructor: msg.sender = ');
-
         // bazrToken.grantRole(bazrToken.MINTER_ROLE(), address(this));
         // bazrToken.grantRole(bazrToken.PAUSER_ROLE(), address(this));
 
