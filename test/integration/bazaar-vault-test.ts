@@ -2,6 +2,8 @@ import * as hardhat from "hardhat";
 import { Contract, ContractFactory, Signer } from "ethers";
 import { expect } from "chai";
 
+import "./contracts-integration-test-env";
+
 describe("Bazaar Vault Contract", function () {
     let deployer: Signer;
     let recipient: Signer;
@@ -16,9 +18,10 @@ describe("Bazaar Vault Contract", function () {
     let bazaarVault: Contract;
 
     before(async function () {
-      this.daiContract = await hardhat.ethers.getContractAt("ERC20", this.DAI_CONTRACT_ADDRESS);
-      this.aDaiContract = await hardhat.ethers.getContractAt("ERC20", this.ADAI_CONTRACT_ADDRESS);
+      // @ts-ignore
+      this.contracts = await hardhat.getContracts();
     });
+
 
     beforeEach(async function () {
         [deployer, recipient] = await hardhat.ethers.getSigners();
@@ -30,7 +33,7 @@ describe("Bazaar Vault Contract", function () {
 
         let recipientAddress = await recipient.getAddress();
 
-        bazaarVault = await BazaarVault.deploy(this.DAI_CONTRACT_ADDRESS, this.ADAI_CONTRACT_ADDRESS, bazrToken.address, recipientAddress, salary);
+        bazaarVault = await BazaarVault.deploy(this.contracts.DAI.address, this.contracts.ADAI.address, bazrToken.address, recipientAddress, salary);
     });
   
     describe("Deployment", function () {
