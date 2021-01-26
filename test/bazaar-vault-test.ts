@@ -7,7 +7,7 @@ import { joinSignature } from "ethers/lib/utils";
 const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 const aDaiAddress = "0x028171bCA77440897B824Ca71D1c56caC55b68A3";
 
-describe("Bazaar Vault Contract", function () {
+describe.skip("Bazaar Vault Contract", function () {
     let owner: Signer;
     let ownerAddress: string;
     

@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.3;
+pragma solidity ^0.6.12;
 
+import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./ILendingPool.sol";
-import "./BazrToken.sol";
-import "./ExchangeRate.sol";
+import "./interface/ILendingPool.sol";
+import "./interface/IBazrToken.sol";
+import "./utils/ExchangeRate.sol";
 
-
-
-contract Vault is ExchangeRate {
+contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     /***************
     STATE VARIABLES
     ***************/
@@ -22,7 +21,7 @@ contract Vault is ExchangeRate {
     ILendingPool public aavePool;
     IERC20 public token;
     IERC20 public aToken;
-    BazrToken public bToken;  // btokens should be mintable
+    IBazrToken public bToken;  // btokens should be mintable
 
     uint256 public nextCheckpoint;
     uint256 public interestEarnedAtLastCheckpoint;  // last time the interest earned was measured
@@ -52,12 +51,15 @@ contract Vault is ExchangeRate {
    /// @param _salary The salary targeted for the recipient.
    /// @param _bToken The hexadecimal address of the associated bToken.
    /// @param _aToken The hexadecimal address of the associated aToken.
-   constructor(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken)  {
+   function initialize(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken, address _owner) public initializer {
+       __Ownable_init();
+        OwnableUpgradeSafe.transferOwnership(_owner);
+
        recipient = _recipient;
        salary = _salary;
 
        token = IERC20(_token);
-       bToken = BazrToken(_bToken);
+       bToken = IBazrToken(_bToken);
        aToken = IERC20(_aToken);
        aavePool = ILendingPool(_aavePool);
 
@@ -127,7 +129,7 @@ contract Vault is ExchangeRate {
         principal = SafeMath.sub(principal, depositorToPrincipal[msg.sender]);
         depositorToPrincipal[msg.sender] = 0;
         // withdraw atokens
-        bToken.burn(balance);
+        bToken.burn(address(this), balance);
         aToken.approve(address(aavePool), aTokenAmount);
         aavePool.withdraw(
             address(token),

@@ -26,7 +26,7 @@ describe("Bazaar Token", function () {
     //   expect(await bazrToken.hasRole(bazrToken.PAUSER_ROLE(), owner.getAddress())).to.be.true;
     // });
 
-    it("Should set the right token name and symbol", async function () {
+    it.skip("Should set the right token name and symbol", async function () {
       expect(await bazrToken.name()).to.equal("Bazaar Token");
       expect(await bazrToken.symbol()).to.equal("BAZR");
     });
