@@ -7,9 +7,11 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol
 contract BazrToken is Initializable, ERC20UpgradeSafe {
 
     address public vault;
+    address public factory;
     
     function initialize(string memory name, string memory symbol) public initializer {
         ERC20UpgradeSafe.__ERC20_init(name, symbol);
+        factory = msg.sender;
     }
 
     function mint(address to, uint256 amount) public {
@@ -25,6 +27,7 @@ contract BazrToken is Initializable, ERC20UpgradeSafe {
     }
 
     function setVaultAddress(address _vault) external {
+        require(msg.sender == factory, "Only callable by Factory");
         vault = _vault;
     }
 }

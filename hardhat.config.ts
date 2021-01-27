@@ -6,7 +6,6 @@ import "hardhat-deploy";
 import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
-import "@openzeppelin/hardhat-upgrades";
 
 import * as dotenv from "dotenv";
 

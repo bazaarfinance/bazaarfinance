@@ -95,6 +95,9 @@ describe("Vault Factory", function () {
         expect((await vaultInstance.recipient()).toString()).to.equal(recipient2Address);
         expect((await vaultInstance.salary())).to.equal(salary);
       });
+      it("should store the Factory's address in the bToken contract", async function () {
+        expect((await bTokenInstance.factory()).toString()).to.equal(vaultFactory.address);
+      });
     });
   });
   
