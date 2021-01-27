@@ -126,6 +126,4 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
     hre.initializeEnvironment = initializeEnvironment;
   // @ts-ignore
     hre.addADaiToWallet = addADaiToWallet;
-  // @ts-ignore
-    hre.addDaiToWallet = addDaiToWallet;
 };
