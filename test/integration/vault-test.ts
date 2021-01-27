@@ -4,11 +4,10 @@ import { expect } from "chai";
 
 import "./contracts-integration-test-env";
 
-describe("Bazaar Vault Contract", function () {
+describe("Vault Contract", function () {
     let deployer: Signer;
     let recipient: Signer;
-
-    let salary: number = 1000;
+    let depositor: Signer;
 
     let BazrToken: ContractFactory;
     let bazrToken: Contract;
@@ -24,12 +23,19 @@ describe("Bazaar Vault Contract", function () {
 
 
     beforeEach(async function () {
-        [deployer, recipient] = await hardhat.ethers.getSigners();
+        [deployer, recipient, depositor] = await hardhat.ethers.getSigners();
+
+        let AavePoolFactory = await ethers.getContractFactory("MockAavePool");
+        let AavePooltx = await AavePoolFactory.deploy(
+          token.address,
+          aToken.address
+        );
+        aavePool = await AavePooltx.deployed();
 
         BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
         bazrToken = await BazrToken.deploy();
     
-        BazaarVault = await hardhat.ethers.getContractFactory("BazaarVault");
+        BazaarVault = await hardhat.ethers.getContractFactory("Vault");
 
         let recipientAddress = await recipient.getAddress();
 
