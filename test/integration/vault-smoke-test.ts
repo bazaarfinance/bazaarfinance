@@ -1,41 +1,57 @@
+
+import { expect } from "chai";
 import { Contract } from "ethers";
 import * as hre from "hardhat";
 import { Contracts } from "./contracts-integration-test-env";
 
 describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) and charlie (recipient):", function () {
   let contracts: Contracts;
+  
   let signers;
 
+  let deployer;
+  let alice, bob, charlie;
+
+  let salary = 100;
+
   let btoken: Contract;
+  let vault: Contract;
 
   before(async function() {
     // @ts-ignore
     contracts = await hre.initializeEnvironment();
-    signers = await hre.ethers.getSigners();
+    signers = [deployer, alice, bob, charlie] = await hre.ethers.getSigners();
   });
 
   before(async function() {
-    let tokenFactory = await hre.ethers.getContractFactory("BazrToken");
-    let btokenDepoymentTx = await tokenFactory.deploy();
+    const tokenFactory = await hre.ethers.getContractFactory("BazrToken");
+    const btokenDepoymentTx = await tokenFactory.deploy();
 
     btoken = await btokenDepoymentTx.deployed();
 
-    vaultFactory = await ethers.getContractFactory("Vault");
-    vaultTx = await vaultFactory.deploy(
-      charlie.address,
-      loadedDAI.address,
-      loadedPOOL.address,
-      "100",
-      btoken.address,
-      loadedADAI.address
+    const recipient = signers[0];
+
+    const vaultFactory = await hre.ethers.getContractFactory("Vault");
+
+    const vaultDepoymentTx = await vaultFactory.deploy(
+        recipient.address,
+        contracts.DAI.address,
+        contracts.AAVE_POOL.address,
+        salary,
+        btoken.address,
+        contracts.ADAI.address
     );
 
-    vault = await vaultTx.deployed();
-  })
+    vault = await vaultDepoymentTx.deployed();
+    // vault.grantRole();
+  });
 
   it("*T1 Alice deposits 1000 Tokens, \n she receives 1000 bTokens back", async function () {
-    aliceVaultSigner = vault.connect(alice);
-    aliceTokenSigner = loadedDAI.connect(alice);
+    let charlie, alice, bob;
+    const accounts = [charlie, alice, bob] = await hre.ethers.getSigners();
+
+    let aliceVaultSigner = vault.connect(alice);
+    let aliceTokenSigner = contracts.DAI.connect(alice);
     await aliceTokenSigner.approve(vault.address, "100000");
     await aliceVaultSigner.deposit("100");
     let bbalance = await btoken.balanceOf(alice.address);
