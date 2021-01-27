@@ -29,7 +29,7 @@
   },
   "scripts": {
     "test": "npx hardhat test ./test/unit/**/*.ts",
-    "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/**/*.ts",
+    "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/*.ts",
     "node": "npx hardhat node --watch",
     "frontend": "cd frontend && npm run start"
   },

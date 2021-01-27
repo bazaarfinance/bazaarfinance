@@ -1,6 +1,9 @@
 import { ethers, network } from "hardhat";
+import { HardhatPluginError, lazyObject } from "hardhat/plugins";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Signer } from "ethers";
 import { assert, expect } from "chai";
+
 
 describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) and charlie (recipient):", function () {
   let alice;
@@ -20,12 +23,24 @@ describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) an
   let bobTokenSigner
   let aliceBtokenSigner
   let bobBtokenSigner
+  let loadedDAI
+  let loadedADAI
+  let loadedPOOL
+  let contractsLoaded = false;
+  let contracts
 
   before(async function () {
+    const contracts = {
+      DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", nameOrAbi: "ERC20" },
+      ADAI: { address: "0x028171bCA77440897B824Ca71D1c56caC55b68A3", nameOrAbi: "ERC20" },
+      AAVE_POOL: { address: "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9", nameOrAbi: "ILendingPool" }
+    }
+    loadedDAI = await ethers.getContractAt(contracts.DAI.nameOrAbi, contracts.DAI.address);
+    loadedADAI = await ethers.getContractAt(contracts.ADAI.nameOrAbi, contracts.ADAI.address);
+    loadedPOOL = await ethers.getContractAt(contracts.AAVE_POOL.nameOrAbi, contracts.AAVE_POOL.address);
+
     const accounts = [charlie, alice, bob] = await ethers.getSigners();
 
-    // @ts-ignore
-    this.contracts = await hre.getContracts();
 
     const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
 
@@ -36,18 +51,17 @@ describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) an
     });
 
     const unlockedRichDaiSigner = await ethers.provider.getSigner(richDaiAccountAddress);
-    await this.contracts.DAI.attach(richDaiAccountAddress);
+    const daiFaucet = loadedDAI.connect(unlockedRichDaiSigner);
 
     const transferPromises = accounts.map(async account => {
-        const address = await account.getAddress();
-        return await this.contracts.DAI.transfer(address, 100);      
+        return await daiFaucet.transfer(account.address, 100);
     });
 
     await Promise.all(transferPromises);
 
 
-    const balance = this.contracts.DAI.balanceOf(alice.address);
-    console.log(`alices balance of DAI: ${balance}`);
+    const balance = await loadedDAI.balanceOf(alice.address);
+    console.log(`alices balance of DAI: ${balance.toString()}`);
 
     // unimpersonate/lock a random user account containing dai
     await network.provider.request({
@@ -57,35 +71,31 @@ describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) an
   });
 
   before(async function() {
-    // let tokenFactory = await ethers.getContractFactory("ERC20");
-    // let btokenTx = await tokenFactory.deploy("bDAI", "bDAI");
+    let tokenFactory = await ethers.getContractFactory("MockERC20"); // need erc20 with a mint/burn methods
+    let btokenTx = await tokenFactory.deploy("bDAI", "bDAI");
 
-    // btoken = await btokenTx.deployed();
+    btoken = await btokenTx.deployed();
 
-    // vaultFactory = await ethers.getContractFactory("Vault");
-    // vaultTx = await vaultFactory.deploy(
-    //   charlie.address,
-    //   token.address,
-    //   aavePool.address,
-    //   "100",
-    //   btoken.address,
-    //   atoken.address,
-    // );
+    vaultFactory = await ethers.getContractFactory("Vault");
+    vaultTx = await vaultFactory.deploy(
+      charlie.address,
+      loadedDAI.address,
+      loadedPOOL.address,
+      "100",
+      btoken.address,
+      loadedADAI.address
+    );
 
-    // vault = await vaultTx.deployed();
-
-    // await this.contracts.DAI.approve(vault.address, 1000);
-
+    vault = await vaultTx.deployed();
   })
 
   it("*T1 Alice deposits 1000 Tokens, \n she receives 1000 bTokens back", async function () {
-    // aliceVaultSigner = vault.connect(alice);
-    // aliceTokenSigner = token.connect(alice);
-    // await aliceTokenSigner.mint(alice.address, "1000");
-    // await aliceTokenSigner.approve(vault.address, "100000");
-    // await aliceVaultSigner.deposit("1000");
-    // let bbalance = await btoken.balanceOf(alice.address);
-    // expect(bbalance.toString()).to.equal("1000");
+    aliceVaultSigner = vault.connect(alice);
+    aliceTokenSigner = loadedDAI.connect(alice);
+    await aliceTokenSigner.approve(vault.address, "100000");
+    await aliceVaultSigner.deposit("100");
+    let bbalance = await btoken.balanceOf(alice.address);
+    expect(bbalance.toString()).to.equal("100");
   })
 
 //   it("*T2 Interest surplus accrued by 200 aTokens, \n charlie earns 100 aTokens, \n 100 alice earns 100 aTokens", async function () {
