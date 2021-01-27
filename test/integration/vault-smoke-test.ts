@@ -1,80 +1,24 @@
-import { ethers, network } from "hardhat";
-import { HardhatPluginError, lazyObject } from "hardhat/plugins";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Signer } from "ethers";
-import { assert, expect } from "chai";
-
+import { Contract } from "ethers";
+import * as hre from "hardhat";
+import { Contracts } from "./contracts-integration-test-env";
 
 describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) and charlie (recipient):", function () {
-  let alice;
-  let bob;
-  let charlie;
-  let aavePool;
-  let token;
-  let atoken;
-  let btoken;
-  let vaultFactory;
-  let vaultTx;
-  let vault;
-  let aliceVaultSigner
-  let bobVaultSigner
-  let charlieVaultSigner
-  let aliceTokenSigner
-  let bobTokenSigner
-  let aliceBtokenSigner
-  let bobBtokenSigner
-  let loadedDAI
-  let loadedADAI
-  let loadedPOOL
-  let contractsLoaded = false;
-  let contracts
+  let contracts: Contracts;
+  let signers;
 
-  before(async function () {
-    const contracts = {
-      DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", nameOrAbi: "ERC20" },
-      ADAI: { address: "0x028171bCA77440897B824Ca71D1c56caC55b68A3", nameOrAbi: "ERC20" },
-      AAVE_POOL: { address: "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9", nameOrAbi: "ILendingPool" }
-    }
-    loadedDAI = await ethers.getContractAt(contracts.DAI.nameOrAbi, contracts.DAI.address);
-    loadedADAI = await ethers.getContractAt(contracts.ADAI.nameOrAbi, contracts.ADAI.address);
-    loadedPOOL = await ethers.getContractAt(contracts.AAVE_POOL.nameOrAbi, contracts.AAVE_POOL.address);
+  let btoken: Contract;
 
-    const accounts = [charlie, alice, bob] = await ethers.getSigners();
-
-
-    const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
-
-    // impersonate/unlock a random user account containing dai
-    await network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [richDaiAccountAddress]
-    });
-
-    const unlockedRichDaiSigner = await ethers.provider.getSigner(richDaiAccountAddress);
-    const daiFaucet = loadedDAI.connect(unlockedRichDaiSigner);
-
-    const transferPromises = accounts.map(async account => {
-        return await daiFaucet.transfer(account.address, 100);
-    });
-
-    await Promise.all(transferPromises);
-
-
-    const balance = await loadedDAI.balanceOf(alice.address);
-    console.log(`alices balance of DAI: ${balance.toString()}`);
-
-    // unimpersonate/lock a random user account containing dai
-    await network.provider.request({
-        method: "hardhat_stopImpersonatingAccount",
-        params: [richDaiAccountAddress]
-    });
+  before(async function() {
+    // @ts-ignore
+    contracts = await hre.initializeEnvironment();
+    signers = await hre.ethers.getSigners();
   });
 
   before(async function() {
-    let tokenFactory = await ethers.getContractFactory("MockERC20"); // need erc20 with a mint/burn methods
-    let btokenTx = await tokenFactory.deploy("bDAI", "bDAI");
+    let tokenFactory = await hre.ethers.getContractFactory("BazrToken");
+    let btokenDepoymentTx = await tokenFactory.deploy();
 
-    btoken = await btokenTx.deployed();
+    btoken = await btokenDepoymentTx.deployed();
 
     vaultFactory = await ethers.getContractFactory("Vault");
     vaultTx = await vaultFactory.deploy(

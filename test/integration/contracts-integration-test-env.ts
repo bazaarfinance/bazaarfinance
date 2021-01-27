@@ -3,6 +3,11 @@ import { Contract, Signer } from "ethers";
 import { HardhatPluginError, lazyObject } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+
+const initialDaiAmount = 1000;
+const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
+
+
 enum ContractDescriptorKeys {
     DAI,
     ADAI,
@@ -24,10 +29,11 @@ const contractDescriptors: ContractDescriptor = {
 
 
 //
-// Integration testing environment public interface below. It adds two things:
+// Integration testing environment public interface below. It sets up 3 things:
 // 
-//   1. a `getContracts()` function on to the HRE (HardhatRuntimeEnvironment)
+//   1. an `initialize()` function on to the HRE (HardhatRuntimeEnvironment)
 //   2. a Contracts type with typed keys, eg: the keys of the contracts we are integrating with
+//   3. initial test accounts are loaded with `initialDaiAmount` dai
 //
 
 export type Contracts = {
@@ -35,38 +41,67 @@ export type Contracts = {
 }
 
 export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
-    let contractsLoaded = false;
+    let initialized = false;
     let contracts: Contracts;
 
     async function getContracts(): Promise<Contracts> {
+        console.info(`bazaar-contracts-integration-test-env plugin: The following deployed contracts are being aysychronously fetched:`);
+        const contractPromises = Object.keys(contractDescriptors).map(contractDescriptorKey => {
+            console.info(`bazaar-contracts-integration-test-env plugin:     ${contractDescriptorKey}: ${contractDescriptors[contractDescriptorKey].address}`);
+            return hre.ethers.getContractAt(contractDescriptors[contractDescriptorKey].nameOrAbi, contractDescriptors[contractDescriptorKey].address);
+        });
+
+        const loadedContracts = await Promise.all(contractPromises);
+        
+        contracts = {
+            DAI: loadedContracts[0],
+            ADAI: loadedContracts[1],
+            AAVE_POOL: loadedContracts[2]
+        };
+    
+        return contracts;
+    }
+
+    async function addDaiToWallets(): Promise<void> {
+        console.info(`bazaar-contracts-integration-test-env plugin: Test accounts are being loaded with Dai`);
+
+        // impersonate/unlock a random user account containing dai
+        await hre.network.provider.request({
+            method: "hardhat_impersonateAccount",
+            params: [richDaiAccountAddress]
+        });
+
+        const unlockedRichDaiSigner = hre.ethers.provider.getSigner(richDaiAccountAddress);
+        const daiFaucet = contracts.DAI.connect(unlockedRichDaiSigner);
+
+        const accounts = await hre.ethers.getSigners();
+
+        await Promise.all(accounts.map(async account => await daiFaucet.transfer(account.address, 100)));
+
+        // unimpersonate/lock a random user account containing dai
+        await hre.network.provider.request({
+            method: "hardhat_stopImpersonatingAccount",
+            params: [richDaiAccountAddress]
+        });
+    }
+
+    async function initializeEnvironment(): Promise<Contracts> {
         try {
-            if (contractsLoaded) {
-                console.info(`bazaar-contracts-integration-test-env plugin: Using cached deployed contracts that were previously fetched`);
+            if (initialized) {
                 return contracts;
             }
-
-            console.info(`bazaar-contracts-integration-test-env plugin: The following deployed contracts are being aysychronously fetched:`);
-            const contractPromises = Object.keys(contractDescriptors).map(contractDescriptorKey => {
-                console.info(`bazaar-contracts-integration-test-env plugin:     ${contractDescriptorKey}: ${contractDescriptors[contractDescriptorKey].address}`);
-                return hre.ethers.getContractAt(contractDescriptors[contractDescriptorKey].nameOrAbi, contractDescriptors[contractDescriptorKey].address);
-            });
-
-            const loadedContracts = await Promise.all(contractPromises);
             
-            contracts = {
-                DAI: loadedContracts[0],
-                ADAI: loadedContracts[1],
-                AAVE_POOL: loadedContracts[2]
-            };
+            contracts = await getContracts();
+            await addDaiToWallets();
+    
+            initialized = true;
 
-            contractsLoaded = true;
-        
             return contracts;
         } catch (error: any) {
-            throw new HardhatPluginError("bazaar-contracts-integration-test-env", "Error initializing contracts", error);
+            throw new HardhatPluginError("bazaar-contracts-integration-test-env", "Error initializing integration test environment", error);
         }
     }
 
     // @ts-ignore
-    hre.getContracts = getContracts;
+    hre.initializeEnvironment = initializeEnvironment;
 };
