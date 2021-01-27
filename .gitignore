@@ -1,6 +1,10 @@
-node_modules
+node_modules/
 
 #hardhat files
 cache
 artifacts
 frontend/src/hardhat
+
+.env
+package-lock.json
+
