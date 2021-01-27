@@ -6,6 +6,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 const initialDaiAmount = 1000;
 const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
+const richADaiAccountAddress = '0x62e41b1185023bcc14a465d350e1dde341557925';
 
 
 enum ContractDescriptorKeys {
@@ -76,7 +77,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
         const accounts = await hre.ethers.getSigners();
 
-        await Promise.all(accounts.map(async account => await daiFaucet.transfer(account.address, 100)));
+        await Promise.all(accounts.map(async account => await daiFaucet.transfer(account.address, 1000)));
 
         // unimpersonate/lock a random user account containing dai
         await hre.network.provider.request({
@@ -84,6 +85,25 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             params: [richDaiAccountAddress]
         });
     }
+
+  async function addADaiToWallet(to: string, amount: string): Promise<void> {
+    // impersonate/unlock a random user account containing dai
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [richADaiAccountAddress]
+    });
+
+    const unlockedRichADaiSigner = hre.ethers.provider.getSigner(richADaiAccountAddress);
+    const adaiFaucet = contracts.ADAI.connect(unlockedRichADaiSigner);
+
+    await adaiFaucet.transfer(to, amount);
+
+    // unimpersonate/lock a random user account containing dai
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: [richDaiAccountAddress]
+    });
+  }
 
     async function initializeEnvironment(): Promise<Contracts> {
         try {
@@ -104,4 +124,8 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
     // @ts-ignore
     hre.initializeEnvironment = initializeEnvironment;
+  // @ts-ignore
+    hre.addADaiToWallet = addADaiToWallet;
+  // @ts-ignore
+    hre.addDaiToWallet = addDaiToWallet;
 };

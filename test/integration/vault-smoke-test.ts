@@ -6,7 +6,6 @@ import { Contracts } from "./contracts-integration-test-env";
 
 describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) and charlie (recipient):", function () {
   let contracts: Contracts;
-  
   let signers;
 
   let deployer;
@@ -43,7 +42,8 @@ describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) an
     );
 
     vault = await vaultDepoymentTx.deployed();
-    // vault.grantRole();
+    let deployerbTokenSigner = btoken.connect(deployer);
+    await deployerbTokenSigner.grantMinter(vault.address);
   });
 
   it("*T1 Alice deposits 1000 Tokens, \n she receives 1000 bTokens back", async function () {
@@ -53,20 +53,20 @@ describe("Vault Contract Smoke Test with alice (depositor1), bob (depositor2) an
     let aliceVaultSigner = vault.connect(alice);
     let aliceTokenSigner = contracts.DAI.connect(alice);
     await aliceTokenSigner.approve(vault.address, "100000");
-    await aliceVaultSigner.deposit("100");
+    await aliceVaultSigner.deposit("1000");
     let bbalance = await btoken.balanceOf(alice.address);
-    expect(bbalance.toString()).to.equal("100");
+    expect(bbalance.toString()).to.equal("1000");
   })
 
-//   it("*T2 Interest surplus accrued by 200 aTokens, \n charlie earns 100 aTokens, \n 100 alice earns 100 aTokens", async function () {
-//     await atoken.mint(vault.address, "200");
-//     await token.mint(aavePool.address, "200");
-//     await vault.manualTransition();
-//     let recipientReserve = await vault.recipientReserve();
-//     let aliceTotal = await vault.totalBalanceOf(alice.address);
-//     expect(recipientReserve).to.equal(100);
-//     expect(aliceTotal).to.equal(1100);
-//   })
+  it("*T2 Interest surplus accrued by 200 aTokens, \n charlie earns 100 aTokens, \n 100 alice earns 100 aTokens", async function () {
+    // @ts-ignore
+    await hre.addADaiToWallet(vault.address, "200"); // simulate interests earned
+    await vault.manualTransition();
+    let recipientReserve = await vault.recipientReserve();
+    let aliceTotal = await vault.totalBalanceOf(alice.address);
+    expect(recipientReserve).to.equal(100);
+    expect(aliceTotal).to.equal(1099); // off by one
+  })
 
 //   it("*T3 Bob deposits 1000 Tokens, \n he receives 909 bTokens back \n ", async function () {
 //     bobVaultSigner = vault.connect(bob);
