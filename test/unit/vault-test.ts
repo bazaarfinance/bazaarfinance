@@ -2,6 +2,7 @@ import { ethers as ethers } from "hardhat";
 import { Contract, ContractFactory } from "ethers";
 import { expect } from "chai";
 
+
 describe("Vault contract", function () {
   // @ts-ignore
   let accounts: ethers.SignerWithAddress[];

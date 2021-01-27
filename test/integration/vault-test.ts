@@ -1,8 +1,11 @@
-import * as hardhat from "hardhat";
+import * as hre from "hardhat";
 import { Contract, ContractFactory, Signer } from "ethers";
 import { expect } from "chai";
 
 import "./contracts-integration-test-env";
+
+const ethers = hre.ethers;
+
 
 describe("Vault Contract", function () {
     let deployer: Signer;
@@ -18,40 +21,18 @@ describe("Vault Contract", function () {
 
     before(async function () {
       // @ts-ignore
-      this.contracts = await hardhat.getContracts();
+      this.contracts = await hre.getContracts();
     });
 
-
     beforeEach(async function () {
-        [deployer, recipient, depositor] = await hardhat.ethers.getSigners();
-
-        let AavePoolFactory = await ethers.getContractFactory("MockAavePool");
-        let AavePooltx = await AavePoolFactory.deploy(
-          token.address,
-          aToken.address
-        );
-        aavePool = await AavePooltx.deployed();
-
-        BazrToken = await hardhat.ethers.getContractFactory("BazrToken");
-        bazrToken = await BazrToken.deploy();
-    
-        BazaarVault = await hardhat.ethers.getContractFactory("Vault");
-
-        let recipientAddress = await recipient.getAddress();
-
-        bazaarVault = await BazaarVault.deploy(this.contracts.DAI.address, this.contracts.ADAI.address, bazrToken.address, recipientAddress, salary);
+      [deployer, recipient, depositor] = await ethers.getSigners();
     });
   
     describe("Deployment", function () {
       it("Should set the correct BazrToken address and permissions", async function () {
-        let vaultBazrToken = await bazaarVault.bazrToken();
-
-        expect(vaultBazrToken).to.equal(bazrToken.address);
-
-        //
-        // test that vault has correct roles on token
-        //
+        const reservesList = await this.contracts.AAVE_POOL.getReservesList();
+        console.log(`reservesList = ${JSON.stringify(reservesList, undefined, 2)}`);
       });
     });
-  });
+});
   

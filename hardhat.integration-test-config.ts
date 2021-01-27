@@ -22,6 +22,9 @@ extendEnvironment(testEnvironment);
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 60000,
+  },
   networks: {
     hardhat: {
       forking: {
@@ -38,7 +41,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.7.3",
+        version: "0.6.12",
         settings: {
           optimizer: {
             enabled: true,
