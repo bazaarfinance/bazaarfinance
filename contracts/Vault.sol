@@ -102,7 +102,7 @@ contract Vault is ExchangeRate {
         emit NewDeposit(msg.sender, _amount);
     }
 
-    /// @notice Withdraws the user's entire balance. 
+    /// @notice Withdraws the user's entire balance.
     function withdraw() public {
         _stateTransition();
         // decrement user's principal, principal and depositorReserve;
@@ -121,7 +121,7 @@ contract Vault is ExchangeRate {
         }
 
         depositorReserve = SafeMath.sub(
-            depositorReserve, 
+            depositorReserve,
             SafeMath.sub(aTokenAmount, depositorToPrincipal[msg.sender])
             );
         principal = SafeMath.sub(principal, depositorToPrincipal[msg.sender]);
@@ -134,7 +134,9 @@ contract Vault is ExchangeRate {
             aTokenAmount,
             msg.sender
         );
-        _updateCheckpointInterest();
+        if (startedSurplus) {
+            _updateCheckpointInterest();
+        }
         emit DepositorWithdraw(msg.sender, aTokenAmount);
     }
 
@@ -151,7 +153,9 @@ contract Vault is ExchangeRate {
             _amount,
             recipient
         );
-        _updateCheckpointInterest();
+        if (startedSurplus) {
+            _updateCheckpointInterest();
+        }
         emit RecipientWithdraw(_amount);
     }
 
