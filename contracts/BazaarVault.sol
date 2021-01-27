@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.7.3;
+pragma solidity ^0.6.12;
 
 import "hardhat/console.sol";
 
@@ -30,7 +30,7 @@ contract BazaarVault {
     address public recipient;
     uint256 public salary;
 
-    constructor(IERC20 _dai, IERC20 _aDai, ERC20PresetMinterPauser _bazrToken, address _recipient, uint256 _salary) {
+    constructor(IERC20 _dai, IERC20 _aDai, ERC20PresetMinterPauser _bazrToken, address _recipient, uint256 _salary) public {
         dai = _dai;
         aDai = _aDai;
         bazrToken = _bazrToken;

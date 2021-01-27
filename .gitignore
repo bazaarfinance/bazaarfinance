@@ -5,6 +5,9 @@ cache
 artifacts
 frontend/src/hardhat
 
+.vscode/
+
 .env
 package-lock.json
+yarn-error.log
 
