@@ -1,6 +1,6 @@
 
 import { Contract, Signer } from "ethers";
-import { HardhatPluginError, lazyObject } from "hardhat/plugins";
+import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 
@@ -47,6 +47,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
     async function getContracts(): Promise<Contracts> {
         console.info(`bazaar-contracts-integration-test-env plugin: The following deployed contracts are being aysychronously fetched:`);
+        
         const contractPromises = Object.keys(contractDescriptors).map(contractDescriptorKey => {
             console.info(`bazaar-contracts-integration-test-env plugin:     ${contractDescriptorKey}: ${contractDescriptors[contractDescriptorKey].address}`);
             return hre.ethers.getContractAt(contractDescriptors[contractDescriptorKey].nameOrAbi, contractDescriptors[contractDescriptorKey].address);
@@ -77,7 +78,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
         const accounts = await hre.ethers.getSigners();
 
-        await Promise.all(accounts.map(async account => await daiFaucet.transfer(account.address, 1000)));
+        await Promise.all(accounts.map(async account => await daiFaucet.transfer(account.address, initialDaiAmount)));
 
         // unimpersonate/lock a random user account containing dai
         await hre.network.provider.request({
@@ -124,6 +125,6 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
     // @ts-ignore
     hre.initializeEnvironment = initializeEnvironment;
-  // @ts-ignore
+    // @ts-ignore
     hre.addADaiToWallet = addADaiToWallet;
 };
