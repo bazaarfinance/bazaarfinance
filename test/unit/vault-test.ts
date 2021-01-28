@@ -1,14 +1,14 @@
-import { ethers } from "hardhat";
-import { Contract, ContractFactory, Signer } from "ethers";
+import { ethers as ethers } from "hardhat";
+import { Contract, ContractFactory } from "ethers";
 import { expect } from "chai";
 
-interface SignerWithAddress extends Signer {
-  address: string;
-};
 
 describe("Vault contract", function () {
-  let accounts: SignerWithAddress[];
+  // @ts-ignore
+  let accounts: ethers.SignerWithAddress[];
+  // @ts-ignore
   let recipient: SignerWithAddress;
+  // @ts-ignore
   let depositor: SignerWithAddress;
   let aavePool: Contract;
   let token: Contract;

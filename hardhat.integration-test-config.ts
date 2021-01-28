@@ -9,32 +9,26 @@ import "@typechain/ethers-v5";
 
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import { extendEnvironment, HardhatUserConfig, task } from "hardhat/config";
+
+import { testEnvironment } from "./test/integration/contracts-integration-test-env"
 
 
 dotenv.config();
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await hre.ethers.getSigners();
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+extendEnvironment(testEnvironment);
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 60000,
+  },
   networks: {
     hardhat: {
       forking: {
-        url: process.env.FORKING_URL,
-        blockNumber: 11712717
+        url: process.env.FORKING_URL
       }
     }
   },
@@ -60,3 +54,7 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+
+
+// 0x66c57bF505A85A74609D2C83E94Aabb26d691E1F

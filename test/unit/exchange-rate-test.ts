@@ -66,17 +66,17 @@ describe("Exchange rate", function () {
         output: "999947616553169198533"
       },
       {
-        name: "shuould return the correct amount for bob after interests accrued",
+        name: "should return the correct amount for bob after interests accrued",
         input: ["2000", "300", "1909", "909"],
         output: "1095180722891566265060"
       },
       {
-        name: "shuould return the correct amount for alice after interests accrued",
+        name: "should return the correct amount for alice after interests accrued",
         input: ["2000", "300", "1909", "1000"],
         output: "1204819277108433734939"
       },
       {
-        name: "shuould return the correct amount for bob after alice cashed out",
+        name: "should return the correct amount for bob after alice cashed out",
         input: ["795", "300", "909", "909"],
         output: "1095000000000000000000"
       },
