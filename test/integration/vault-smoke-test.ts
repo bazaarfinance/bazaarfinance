@@ -41,7 +41,7 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
     vaultBlueprint = await vaultDepoymentTx.deployed();
 
     const VaultFactory = await hre.ethers.getContractFactory("VaultFactory");
-    const vaultFactoryDepoymentTx = await VaultFactory.deploy(contracts.ADAI.address, vaultBlueprint.address, btokenBlueprint.address);
+    const vaultFactoryDepoymentTx = await VaultFactory.deploy(contracts.AAVE_POOL.address, vaultBlueprint.address, btokenBlueprint.address);
     vaultFactory = await vaultFactoryDepoymentTx.deployed();
   });
 
@@ -67,12 +67,12 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
 
   it("*T2 Interest surplus accrued by 200 aTokens, \n recipient earns 100 aTokens, \n 100 depositor1 earns 100 aTokens", async function () {
     // @ts-ignore
-    // await hre.addADaiToWallet(vaultBlueprint.address, "200"); // simulate interests earned
-    // await vaultBlueprint.manualTransition();
-    // let recipientReserve = await vaultBlueprint.recipientReserve();
-    // let depositor1Total = await vaultBlueprint.totalBalanceOf(depositor1.address);
-    // expect(recipientReserve).to.equal(100);
-    // expect(depositor1Total).to.equal(1099); // off by one
+    await hre.addADaiToWallet(vaultInstance.address, "200"); // simulate interests earned
+    await vaultInstance.manualTransition();
+    let recipientReserve = await vaultInstance.recipientReserve();
+    let depositor1Total = await vaultInstance.totalBalanceOf(depositor1.address);
+    expect(recipientReserve).to.equal(100);
+    expect(depositor1Total).to.equal(1099); // off by one
   })
 
 //   it("*T3 depositor2 deposits 1000 Tokens, \n he receives 909 bTokens back \n ", async function () {
