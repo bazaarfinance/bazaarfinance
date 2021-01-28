@@ -1,12 +1,18 @@
 
-import { Contract, Signer } from "ethers";
+import { Contract, Signer, utils } from "ethers";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 
-const initialDaiAmount = 1000;
+// base unit is 18 decimals
+function toBaseUnit(amount: string): any{
+  return utils.parseEther(amount);
+}
+
+const initialDaiAmount = toBaseUnit("1000");
 const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
 const richADaiAccountAddress = '0x62e41b1185023bcc14a465d350e1dde341557925';
+let deployer, depositor1, depositor2, recipient;
 
 
 enum ContractDescriptorKeys {
@@ -60,7 +66,6 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             ADAI: loadedContracts[1],
             AAVE_POOL: loadedContracts[2]
         };
-    
         return contracts;
     }
 
@@ -114,7 +119,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             
             contracts = await getContracts();
             await addDaiToWallets();
-    
+
             initialized = true;
 
             return contracts;
