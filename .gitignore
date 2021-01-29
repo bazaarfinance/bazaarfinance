@@ -1,6 +1,13 @@
-node_modules
+node_modules/
 
 #hardhat files
 cache
 artifacts
 frontend/src/hardhat
+
+.vscode/
+
+.env
+package-lock.json
+yarn-error.log
+
