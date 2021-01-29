@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
 import truncate from 'truncate-middle';
 
-import { Web3Context } from 'providers/web3';
+import { CurrentAddressContext, ProviderContext } from 'hardhat/SymfoniContext';
 
 const Container = styled.div`
   background-color: grey;
@@ -38,7 +38,20 @@ const EthereumDetail = styled.div`
   }
 `;
 function NavBar() {
-  const { network, address } = useContext(Web3Context);
+  const [provider, setProvider] = useContext(ProviderContext);
+  const [address, setAddress] = useContext(CurrentAddressContext);
+
+  const [network, setNetwork] = useState<string>('');
+
+  useEffect(() => {
+    const doAsync = async () => {
+      if (provider) {
+        const network = await provider.getNetwork();
+        setNetwork(network.name);
+      }
+    };
+    doAsync();
+  });
 
   return (
     <Container>
