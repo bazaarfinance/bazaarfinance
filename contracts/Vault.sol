@@ -116,7 +116,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, Pausable {
     }
 
     /// @notice Withdraws the user's entire balance. 
-    function withdraw() public {
+    function withdraw() public whenNotPaused {
         _stateTransition();
         // decrement user's principal, principal and depositorReserve;
         uint256 balance = bToken.balanceOf(msg.sender);
