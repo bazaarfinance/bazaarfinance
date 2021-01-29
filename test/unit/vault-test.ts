@@ -5,7 +5,7 @@ import { expect } from "chai";
 
 describe("Vault contract", function () {
   // @ts-ignore
-  let accounts: ethers.SignerWithAddress[];
+  let admin: SignerWithAddress;
   // @ts-ignore
   let recipient: SignerWithAddress;
   // @ts-ignore
@@ -24,11 +24,12 @@ describe("Vault contract", function () {
   let vaultInstance: Contract;
   let bTokenAddress: string;
   let vaultAddress: string;
+  let vaultFactoryTx: Contract;
+  let bazaarVaultTx: Contract;
+  let bazrTokenTx: Contract;
 
   beforeEach(async function () {
-    accounts = await ethers.getSigners();
-    recipient = accounts[0];
-    depositor = accounts[1];
+    [admin, recipient, depositor] = await ethers.getSigners();
     let mocktokenfactory = await ethers.getContractFactory("MockERC20");
     let tokenTx = await mocktokenfactory.deploy("DAI", "DAI");
     let aTokenTx = await mocktokenfactory.deploy("aDAI", "aDAI");
@@ -43,16 +44,16 @@ describe("Vault contract", function () {
     aavePool = await AavePooltx.deployed();
 
     BazaarVault = await ethers.getContractFactory("Vault");
-    bazaarVault = await BazaarVault.deploy();
-    await bazaarVault.deployed();
+    bazaarVaultTx = await BazaarVault.deploy();
+    bazaarVault = await bazaarVaultTx.deployed();
 
     BazrToken = await ethers.getContractFactory("BazrToken");
-    bazrToken = await BazrToken.deploy();
-    await bazrToken.deployed();
+    bazrTokenTx = await BazrToken.deploy();
+    bazrToken = await bazrTokenTx.deployed();
 
-    VaultFactory = await ethers.getContractFactory("VaultFactory");
-    vaultFactory = await VaultFactory.deploy(aavePool.address, bazaarVault.address, bazrToken.address);
-    await vaultFactory.deployed();
+    VaultFactory = await ethers.getContractFactory("VaultFactory", { signer: admin });
+    vaultFactoryTx = await VaultFactory.deploy(aavePool.address, bazaarVault.address, bazrToken.address);
+    vaultFactory = await vaultFactoryTx.deployed();
 
     // initialize a new vault and bToken contract (BToken needs to be deployed first to get its address)
     await vaultFactory.createBazrToken("BToken", "BZR");
@@ -96,23 +97,57 @@ describe("Vault contract", function () {
     });
   });
 
+  describe("pausable", function () {
+    let vaultWithAdminSigner;
+    let vaultWithNonAdminSigner;
+    it("should revert if non-admin calls pause", async function () {
+      vaultWithNonAdminSigner = vaultInstance.connect(recipient);
+      await expect(vaultWithNonAdminSigner.pause()).to.be.revertedWith("Only callable by admin");
+    });
+    it("should revert if non-admin calls unpause", async function () {
+      vaultWithAdminSigner = vaultInstance.connect(admin);
+      await vaultWithAdminSigner.pause();
+      vaultWithNonAdminSigner = vaultInstance.connect(recipient);
+      await expect(vaultWithNonAdminSigner.unpause()).to.be.revertedWith("Only callable by admin");
+    });
+    it("should allow an admin to pause the contract", async function () {
+      vaultWithAdminSigner = vaultInstance.connect(admin);
+      await vaultWithAdminSigner.pause();
+      expect(await vaultInstance.paused()).to.be.true;
+    });
+    it("should allow an admin to unpause the contract", async function () {
+      vaultWithAdminSigner = vaultInstance.connect(admin);
+      await vaultWithAdminSigner.pause();
+      expect(await vaultInstance.paused()).to.be.true;
+      await vaultWithAdminSigner.unpause();
+      expect(await vaultInstance.paused()).to.be.false;
+    });
+  });
+
   describe("deposit", function () {
-    let vaultWithSigner;
-    let tokenWithSigner;
+    let vaultWithAdminSigner;
+    let vaultWithDepositorSigner;
+    let tokenWithDepositorSigner;
 
     beforeEach(async function () {
-      vaultWithSigner = vaultInstance.connect(depositor);
-      tokenWithSigner = token.connect(depositor);
-      await tokenWithSigner.mint(depositor.address, "10000");
-      await tokenWithSigner.approve(vaultInstance.address, "10000");
+      vaultWithDepositorSigner = vaultInstance.connect(depositor);
+      tokenWithDepositorSigner = token.connect(depositor);
+      await tokenWithDepositorSigner.mint(depositor.address, "10000");
+      await tokenWithDepositorSigner.approve(vaultInstance.address, "10000");
+    });
+
+    it("should revert when Vault is paused", async function () {
+      vaultWithAdminSigner = vaultInstance.connect(admin);
+      await vaultWithAdminSigner.pause();
+      await expect(vaultWithDepositorSigner.deposit("1000")).to.be.revertedWith("Pausable: paused");
     });
 
     it("should successfully make deposit", async function () {
-      let allow = await tokenWithSigner.allowance(
+      let allow = await tokenWithDepositorSigner.allowance(
         depositor.address,
         vaultInstance.address
       );
-      await vaultWithSigner.deposit("1000");
+      await vaultWithDepositorSigner.deposit("1000");
       let balance = await token.balanceOf(aavePool.address);
       let bbalance = await bTokenInstance.balanceOf(depositor.address);
       let abalance = await aToken.balanceOf(vaultInstance.address);
@@ -133,11 +168,11 @@ describe("Vault contract", function () {
     });
 
     it("should return the correct amount of bToken after first deposit", async function () {
-      let allow = await tokenWithSigner.allowance(
+      let allow = await tokenWithDepositorSigner.allowance(
         depositor.address,
         vaultInstance.address
       );
-      await vaultWithSigner.deposit("1000");
+      await vaultWithDepositorSigner.deposit("1000");
       let principal = await vaultInstance.principal();
       let depositorPrincipal = await vaultInstance.depositorToPrincipal(
         depositor.address
@@ -145,7 +180,7 @@ describe("Vault contract", function () {
       let depositorReserve = await vaultInstance.depositorReserve();
       let supply = await bTokenInstance.totalSupply();
       await aToken.mint(vaultInstance.address, "1100"); // simulate interests 1000 to recipient, 100 to depositor
-      await vaultWithSigner.deposit("1000"); // force state transition and return 909 bTokens, exchange rate should change
+      await vaultWithDepositorSigner.deposit("1000"); // force state transition and return 909 bTokens, exchange rate should change
       let bbalance = await bTokenInstance.balanceOf(depositor.address);
       expect(bbalance).to.equal("1909");
     });

@@ -1,10 +1,16 @@
 import { ethers } from "hardhat";
-import { Contract, ContractFactory, Signer} from "ethers";
+import { Contract, ContractFactory, Signer, Transaction} from "ethers";
 import { expect } from "chai";
+import { Address } from "cluster";
 
 describe("Vault Factory", function () {
     let owner: Signer;
+    let factoryWithOwnerSigner: Contract;
     let ownerAddress: string;
+    
+    let newAdmin: Signer;
+    let newAdminAddress: string;
+    let newAdminFactorySigner: Contract;
     
     let recipient: Signer;
     let recipient2: Signer;
@@ -18,6 +24,9 @@ describe("Vault Factory", function () {
     let bazaarVault: Contract;
     let VaultFactory: ContractFactory;
     let vaultFactory: Contract;
+    let vaultFactoryTx: Contract;
+    let bazaarVaultTx: Contract;
+    let bazrTokenTx: Contract;
 
     let aavePool: Contract;
     let token: Contract;
@@ -27,9 +36,13 @@ describe("Vault Factory", function () {
     let bTokenAddress: string;
     let vaultAddress: string;
 
+    // bytes32 encoding of "ADMIN_ROLE" used to test permissions
+    let adminRoleEncoded: string;
+
     before(async function () {
-      [owner, recipient, recipient2] = await ethers.getSigners();
+      [owner, newAdmin, recipient, recipient2] = await ethers.getSigners();
       ownerAddress = await owner.getAddress();
+      newAdminAddress = await newAdmin.getAddress();
       recipientAddress = await recipient.getAddress();
       recipient2Address = await recipient2.getAddress();
 
@@ -41,24 +54,70 @@ describe("Vault Factory", function () {
   
       let AavePoolFactory = await ethers.getContractFactory("MockAavePool");
       let AavePooltx = await AavePoolFactory.deploy(token.address, aToken.address);
-      aavePool = await AavePooltx.deployed()
+      aavePool = await AavePooltx.deployed();
     });
 
     beforeEach(async function () {
       BazaarVault = await ethers.getContractFactory("Vault");
-      bazaarVault = await BazaarVault.deploy();
-      await bazaarVault.deployed();
+      bazaarVaultTx = await BazaarVault.deploy();
+      bazaarVault = await bazaarVaultTx.deployed();
 
       BazrToken = await ethers.getContractFactory("BazrToken");
-      bazrToken = await BazrToken.deploy();
-      await bazrToken.deployed();
+      bazrTokenTx = await BazrToken.deploy();
+      bazrToken = await bazrTokenTx.deployed();
 
-      VaultFactory = await ethers.getContractFactory("VaultFactory");
-      vaultFactory = await VaultFactory.deploy(aavePool.address, bazaarVault.address, bazrToken.address);
-      await vaultFactory.deployed();
+      VaultFactory = await ethers.getContractFactory("VaultFactory", { signer: owner });
+      vaultFactoryTx = await VaultFactory.deploy(aavePool.address, bazaarVault.address, bazrToken.address);
+      vaultFactory = await vaultFactoryTx.deployed();
+
+      adminRoleEncoded = await vaultFactory.ADMIN();
+    });
+
+    describe("Access Control", function () {
+      it("should set the Factory deployer as an admin", async function () {
+        expect(await vaultFactory.hasRole(adminRoleEncoded, ownerAddress)).to.be.true;
+        expect(await vaultFactory.getRoleMemberCount(adminRoleEncoded)).to.equal(1);
+      });
+      it("should revert if a non-admin tries to grant admin role", async function () {
+        let factoryWithNonOwnerSigner = await vaultFactory.connect(recipient);
+        await expect(factoryWithNonOwnerSigner.grantRole(adminRoleEncoded, newAdminAddress)).to.be.revertedWith("AccessControl: sender must be an admin to grant");
+      });
+      it("should revert if a non-admin tries to call createBToken", async function () {
+        let factoryWithNonOwnerSigner = await vaultFactory.connect(recipient);
+        await expect(factoryWithNonOwnerSigner.createBazrToken("BToken", "BZR")).to.be.revertedWith("Only callable by admin");
+      });
+      it("should revert if a non-admin tries to call createVault", async function () {
+        let factoryWithNonOwnerSigner = await vaultFactory.connect(recipient);
+        await expect(factoryWithNonOwnerSigner.createVault(recipientAddress, token.address, salary, bazrToken.address, aToken.address)).to.be.revertedWith("Only callable by admin");
+      });
+      it("should let the Factory deployer (default admin) grant admin status to another address", async function () {
+        factoryWithOwnerSigner = await vaultFactory.connect(owner);
+        await factoryWithOwnerSigner.grantRole(adminRoleEncoded, newAdminAddress);
+        expect(await vaultFactory.hasRole(adminRoleEncoded, newAdminAddress)).to.be.true;
+        expect(await vaultFactory.getRoleMemberCount(adminRoleEncoded)).to.equal(2);
+      });
+      it("should let a new admin call createVault and createBToken", async function () {
+        factoryWithOwnerSigner = await vaultFactory.connect(owner);
+        await factoryWithOwnerSigner.grantRole(adminRoleEncoded, newAdminAddress);
+        newAdminFactorySigner = await vaultFactory.connect(newAdmin);
+
+        await newAdminFactorySigner.createBazrToken("BToken", "BZR");
+        bTokenAddress = await newAdminFactorySigner.projectIdToBToken(0);
+        bTokenInstance = await ethers.getContractAt("BazrToken", bTokenAddress);
+
+        await newAdminFactorySigner.createVault(recipientAddress, token.address, salary, bTokenAddress, aToken.address);
+        vaultAddress = await newAdminFactorySigner.bTokenToVault(bTokenAddress);
+        vaultInstance = await ethers.getContractAt("Vault", vaultAddress);
+
+        expect((await bTokenInstance.name()).toString()).to.equal("BToken");
+        expect((await bTokenInstance.symbol()).toString()).to.equal("BZR");
+
+        expect((await vaultInstance.recipient()).toString()).to.equal(recipientAddress);
+        expect((await vaultInstance.salary())).to.equal(salary);
+      });
     });
   
-    describe("Deployment", function () {
+    describe("Vault and bToken initialization", function () {
       beforeEach(async function () {
         // initialize a new vault and bToken contract (BToken needs to be deployed first to get its address)
         await vaultFactory.createBazrToken("BToken", "BZR");
@@ -74,8 +133,8 @@ describe("Vault Factory", function () {
         expect(await vaultFactory.bTokenImplementation()).to.equal(bazrToken.address);
       });
       it("should return correct parameters for newly initialized contracts", async function () {
-        expect ((await bTokenInstance.name()).toString()).to.equal("BToken");
-        expect ((await bTokenInstance.symbol()).toString()).to.equal("BZR");
+        expect((await bTokenInstance.name()).toString()).to.equal("BToken");
+        expect((await bTokenInstance.symbol()).toString()).to.equal("BZR");
 
         expect((await vaultInstance.recipient()).toString()).to.equal(recipientAddress);
         expect((await vaultInstance.salary())).to.equal(salary);

@@ -2,14 +2,22 @@
 pragma solidity ^0.6.12;
 
 import "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./interface/IBazrToken.sol";
+import "./interface/IVaultFactory.sol";
 import "./utils/ExchangeRate.sol";
 
-contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
+contract Vault is ExchangeRate, OwnableUpgradeSafe, Pausable {
+
+    /***************
+    CONSTANTS
+    ***************/
+
+    bytes32 public constant ADMIN = keccak256("ADMIN_ROLE");
+
     /***************
     STATE VARIABLES
     ***************/
@@ -19,6 +27,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     uint256 public salary;
 
     /// @dev Associated external smart contracts. 
+    IVaultFactory public factory;
     ILendingPool public aavePool;
     IERC20 public token;
     IERC20 public aToken;
@@ -59,6 +68,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
        recipient = _recipient;
        salary = _salary;
 
+       factory = IVaultFactory(msg.sender);
        token = IERC20(_token);
        bToken = IBazrToken(_bToken);
        aToken = IERC20(_aToken);
@@ -75,7 +85,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
 
     /// @notice Deposits `_amount` of `token` into Aave pool and mints equivalent bTokens. 
     /// @param _amount The amount to deposit.
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) public whenNotPaused {
         _stateTransition();
 
         token.transferFrom(msg.sender, address(this), _amount);
@@ -158,6 +168,18 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         emit RecipientWithdraw(_amount);
     }
 
+    /// @notice Pauses the contract. Only callable by admin
+    function pause() external {
+        require(factory.hasRole(ADMIN, msg.sender), "Only callable by admin");
+        _pause();
+    }
+
+    /// @notice Unpauses the contract. Only callable by admin
+    function unpause() external {
+        require(factory.hasRole(ADMIN, msg.sender), "Only callable by admin");
+        _unpause();
+    }
+
     /// @notice Calculates the principal plus interest earned by _address in aTokens.
     /// @param _address The address to query the balance for. 
     /// @return Balance of the _address in aTokens.
@@ -182,8 +204,6 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         _stateTransition();
         _updateCheckpointInterest();
     }
-
-
 
     function _stateTransition() private {
         // totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
@@ -237,6 +257,16 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
             }
             _reset();  // always _reset when current time is higher than checkpoint
         }
+    }
+
+    /// @notice override duplicate functions as contract inherits from both OwnableUpgradeSafe and Pausable
+    function _msgSender() internal view override(Context, ContextUpgradeSafe) returns (address payable) {
+        return ContextUpgradeSafe._msgSender();
+    }
+    
+    /// @notice override duplicate functions as contract inherits from both OwnableUpgradeSafe and Pausable
+    function _msgData() internal view override(Context, ContextUpgradeSafe) returns (bytes memory) {
+        return ContextUpgradeSafe._msgData();
     }
 
     function _reset() private {
