@@ -1,4 +1,3 @@
-
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy-ethers";
@@ -10,7 +9,6 @@ import "@typechain/ethers-v5";
 import * as dotenv from "dotenv";
 
 import { HardhatUserConfig, task } from "hardhat/config";
-
 
 dotenv.config();
 
@@ -34,9 +32,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: process.env.FORKING_URL,
-        blockNumber: 11712717
-      }
-    }
+      },
+    },
   },
   paths: {
     artifacts: "./artifacts",
