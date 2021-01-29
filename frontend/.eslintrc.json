@@ -8,7 +8,7 @@
       "plugin:@typescript-eslint/recommended",
       "plugin:prettier/recommended"
     ],
-    "plugins": ["prettier", "@typescript-eslint", "react"],
+    "plugins": ["prettier", "@typescript-eslint"],
     "parser": "@typescript-eslint/parser",
     "rules": {
       "@typescript-eslint/explicit-function-return-type": "off",

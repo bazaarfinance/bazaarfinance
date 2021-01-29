@@ -45,11 +45,6 @@
   },
   "devDependencies": {
     "eslint-config-prettier": "^7.2.0",
-    "eslint-config-react": "^1.1.7",
-    "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-prettier": "^3.3.1"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   }
 }
