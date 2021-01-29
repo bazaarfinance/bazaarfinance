@@ -38,8 +38,8 @@ const EthereumDetail = styled.div`
   }
 `;
 function NavBar() {
-  const [provider, setProvider] = useContext(ProviderContext);
-  const [address, setAddress] = useContext(CurrentAddressContext);
+  const [provider, _setProvider] = useContext(ProviderContext);
+  const [address, _setAddress] = useContext(CurrentAddressContext);
 
   const [network, setNetwork] = useState<string>('');
 
