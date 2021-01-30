@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interface/IBazrToken.sol";
 import "./utils/ExchangeRate.sol";
+/* import "hardhat/console.sol"; */
 
 contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     /***************
@@ -101,7 +102,9 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
         principal = SafeMath.add(principal, _amount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
-        _updateCheckpointInterest();
+        if (startedSurplus) {
+            _updateCheckpointInterest();
+        }
         emit NewDeposit(msg.sender, _amount);
     }
 
@@ -137,7 +140,9 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
             aTokenAmount,
             msg.sender
         );
-        _updateCheckpointInterest();
+        if (startedSurplus) {
+            _updateCheckpointInterest();
+        }
         emit DepositorWithdraw(msg.sender, aTokenAmount);
     }
 
@@ -188,11 +193,11 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     function _stateTransition() private {
         // totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
         // totalInterestEarned - interestEarnedAtLastCheckpoint will give us the interests we need to allocate
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
+        uint256 totalInterestEarned = SafeMath.sub(aToken.balanceOf(address(this)), principal);
         if (block.timestamp < nextCheckpoint){
             if (!startedSurplus) {
                 /* Check if interest earned exceeds salary. If true, adds salary to recipient reserve and any surplus to depositor reserve. */
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
+                if (SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint) >= salary) {
                     recipientReserve = SafeMath.add(recipientReserve, salary);
                     depositorReserve = SafeMath.add(
                         depositorReserve,
@@ -204,7 +209,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
                     startedSurplus = true;  /* Set flag to true to direct interest to depositor reserver until next checkpoint */
                 } else {
                     /* Do nothing until the unallocated interest exceeds the salary */ 
-                    return; 
+                    return;
                 }
             } else {
                 depositorReserve = SafeMath.add(
@@ -214,7 +219,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
             }
         } else {
             if (!startedSurplus) {
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
+                if (SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint) >= salary) {
                     recipientReserve = SafeMath.add(recipientReserve, salary);
                     depositorReserve = SafeMath.add(
                         depositorReserve, 
@@ -223,7 +228,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
                                 totalInterestEarned,
                                 interestEarnedAtLastCheckpoint
                             ), salary));                }
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint < salary ) {
+                if (SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint) < salary ) {
                     recipientReserve = SafeMath.add(
                         recipientReserve, 
                         SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
@@ -248,7 +253,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
     function _updateCheckpointInterest() private {
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
+        uint256 totalInterestEarned = SafeMath.sub(aToken.balanceOf(address(this)), principal);
         interestEarnedAtLastCheckpoint = totalInterestEarned;
     }
 

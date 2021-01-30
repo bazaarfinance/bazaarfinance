@@ -11,7 +11,7 @@ function sleep(ms) {
 
 async function main() {
 
-  let recipient = "0x31567830e4482739Df31D36E5dB47F4FA67ac072"
+  const recipient = "0x31567830e4482739Df31D36E5dB47F4FA67ac072"
   const contracts = {
     AAVE_POOL: "0x9FE532197ad76c5a68961439604C037EB79681F0",
     ADAI: "0xdcf0af9e59c002fa3aa091a46196b37530fd48a8",
@@ -31,11 +31,11 @@ async function main() {
   const Vault = await hre.ethers.getContractFactory("Vault");
   const vaultDepoymentTx = await Vault.deploy();
   
-  let vaultBlueprint = await vaultDepoymentTx.deployed();
+  const vaultBlueprint = await vaultDepoymentTx.deployed();
 
   const VaultFactory = await hre.ethers.getContractFactory("VaultFactory");
   const vaultFactoryDepoymentTx = await VaultFactory.deploy(contracts.AAVE_POOL, vaultBlueprint.address, btokenBlueprint.address);
-  let vaultFactory = await vaultFactoryDepoymentTx.deployed();
+  const vaultFactory = await vaultFactoryDepoymentTx.deployed();
   console.log("vault factory contract deployed at:", vaultFactory.address)
 
   await vaultFactory.createBazrToken("BToken", "BZR");
