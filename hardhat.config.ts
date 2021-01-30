@@ -12,7 +12,6 @@ import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
 
 
-// dotenv.config({ path: require('find-config')('.env') })
 dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to

@@ -8,6 +8,7 @@ function toBaseUnit(amount: string): BigNumber{
   return utils.parseEther(amount);
 }
 
+// compare two numbers within a margin of error
 function closeTo(amount) {
   return function(amount2) {
     let dif = amount.gte(amount2) ? amount.mod(amount2) : amount2.mod(amount);
