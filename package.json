@@ -30,6 +30,7 @@
   "scripts": {
     "test": "npx hardhat test ./test/unit/*.ts",
     "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/*.ts",
+    "deploy:kovan": "npx hardhat --config hardhat.kovan-staging-config.ts run scripts/kovan-deployment.ts --network kovan",
     "node": "npx hardhat node --watch",
     "frontend": "cd frontend && npm run start"
   },

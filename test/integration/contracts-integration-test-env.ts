@@ -3,13 +3,7 @@ import { Contract, Signer, utils } from "ethers";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-
-// base unit is 18 decimals
-function toBaseUnit(amount: string): any{
-  return utils.parseEther(amount);
-}
-
-const initialDaiAmount = toBaseUnit("1000");
+const initialDaiAmount = utils.parseEther("1000");
 const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
 const richADaiAccountAddress = '0x62e41b1185023bcc14a465d350e1dde341557925';
 let deployer, depositor1, depositor2, recipient;
@@ -53,14 +47,14 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
     async function getContracts(): Promise<Contracts> {
         console.info(`bazaar-contracts-integration-test-env plugin: The following deployed contracts are being aysychronously fetched:`);
-        
+
         const contractPromises = Object.keys(contractDescriptors).map(contractDescriptorKey => {
             console.info(`bazaar-contracts-integration-test-env plugin:     ${contractDescriptorKey}: ${contractDescriptors[contractDescriptorKey].address}`);
             return hre.ethers.getContractAt(contractDescriptors[contractDescriptorKey].nameOrAbi, contractDescriptors[contractDescriptorKey].address);
         });
 
         const loadedContracts = await Promise.all(contractPromises);
-        
+
         contracts = {
             DAI: loadedContracts[0],
             ADAI: loadedContracts[1],
@@ -116,7 +110,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             if (initialized) {
                 return contracts;
             }
-            
+
             contracts = await getContracts();
             await addDaiToWallets();
 
