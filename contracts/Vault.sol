@@ -3,20 +3,22 @@ pragma solidity ^0.6.12;
 
 import "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
 import "./interface/IBazrToken.sol";
-import "./interface/IVaultFactory.sol";
 import "./utils/ExchangeRate.sol";
 
-contract Vault is ExchangeRate, OwnableUpgradeSafe, Pausable {
+/// declare IVaultFactory as the Vault Contract has to check hasRole
+interface IVaultFactory {
+    function hasRole(bytes32 role, address account) external view returns (bool);
+}
+
+contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
 
     /***************
     CONSTANTS
     ***************/
 
-    bytes32 public constant ADMIN = keccak256("ADMIN_ROLE");
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     /***************
     STATE VARIABLES
@@ -170,13 +172,13 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, Pausable {
 
     /// @notice Pauses the contract. Only callable by admin
     function pause() external {
-        require(factory.hasRole(ADMIN, msg.sender), "Only callable by admin");
+        require(factory.hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
         _pause();
     }
 
     /// @notice Unpauses the contract. Only callable by admin
     function unpause() external {
-        require(factory.hasRole(ADMIN, msg.sender), "Only callable by admin");
+        require(factory.hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
         _unpause();
     }
 
@@ -257,16 +259,6 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, Pausable {
             }
             _reset();  // always _reset when current time is higher than checkpoint
         }
-    }
-
-    /// @notice override duplicate functions as contract inherits from both OwnableUpgradeSafe and Pausable
-    function _msgSender() internal view override(Context, ContextUpgradeSafe) returns (address payable) {
-        return ContextUpgradeSafe._msgSender();
-    }
-    
-    /// @notice override duplicate functions as contract inherits from both OwnableUpgradeSafe and Pausable
-    function _msgData() internal view override(Context, ContextUpgradeSafe) returns (bytes memory) {
-        return ContextUpgradeSafe._msgData();
     }
 
     function _reset() private {

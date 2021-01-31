@@ -2,13 +2,11 @@
 
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/AccessControl.sol";
 import "./lib/ProxyFactory.sol";
 import "./interface/IBazrToken.sol";
 
-contract VaultFactory is ProxyFactory, AccessControl {
-
-  bytes32 public constant ADMIN = keccak256("ADMIN_ROLE");
+contract VaultFactory is ProxyFactory, AccessControlUpgradeSafe {
   
   uint256 private _nextProjectId;
 
@@ -34,7 +32,6 @@ contract VaultFactory is ProxyFactory, AccessControl {
       _nextProjectId = 0;
       // set up permissions
       _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-      _setupRole(ADMIN, msg.sender);
     }
 
     /// @dev Creates Vault for a new project
@@ -43,7 +40,7 @@ contract VaultFactory is ProxyFactory, AccessControl {
     /// @return address of the new Vault
     function createVault(address recipient, address token, uint256 salary, address bToken, address aToken) public returns (address) {
 
-      require(hasRole(ADMIN, msg.sender), "Only callable by admin");
+      require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
 
       bytes memory _payload = abi.encodeWithSignature(
           "initialize(address,address,address,uint256,address,address,address)",
@@ -74,7 +71,7 @@ contract VaultFactory is ProxyFactory, AccessControl {
     /// @return address of the new bToken
     function createBazrToken(string memory name, string memory symbol) public returns (address) {
 
-      require(hasRole(ADMIN, msg.sender), "Only callable by admin");
+      require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
 
       bytes memory _payload = abi.encodeWithSignature(
           "initialize(string,string)",

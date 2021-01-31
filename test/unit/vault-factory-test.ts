@@ -1,7 +1,6 @@
 import { ethers } from "hardhat";
-import { Contract, ContractFactory, Signer, Transaction} from "ethers";
+import { Contract, ContractFactory, Signer } from "ethers";
 import { expect } from "chai";
-import { Address } from "cluster";
 
 describe("Vault Factory", function () {
     let owner: Signer;
@@ -70,7 +69,7 @@ describe("Vault Factory", function () {
       vaultFactoryTx = await VaultFactory.deploy(aavePool.address, bazaarVault.address, bazrToken.address);
       vaultFactory = await vaultFactoryTx.deployed();
 
-      adminRoleEncoded = await vaultFactory.ADMIN();
+      adminRoleEncoded = await vaultFactory.DEFAULT_ADMIN_ROLE();
     });
 
     describe("Access Control", function () {
