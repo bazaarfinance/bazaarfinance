@@ -2,19 +2,8 @@ import { expect } from "chai";
 import { Contract, utils, BigNumber } from "ethers";
 import * as hre from "hardhat";
 import { Contracts } from "./contracts-integration-test-env";
+import { toBaseUnit, closeTo } from "./utils/numbers";
 
-// base unit is 18 decimals
-function toBaseUnit(amount: string): BigNumber{
-  return utils.parseEther(amount);
-}
-
-// compare two numbers within a margin of error
-function closeTo(amount) {
-  return function(amount2) {
-    let dif = amount.gte(amount2) ? amount.mod(amount2) : amount2.mod(amount);
-    return dif.lte(utils.parseEther("0.1"));
-  }
-}
 
 describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:", function () {
   let contracts: Contracts;
@@ -71,17 +60,21 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
   it("*T1 depositor1 deposits 1000 Tokens, \n she receives 1000 bTokens back", async function () {
     await depositor1.DAI.approve(vaultInstance.address, depositAmount);
     await depositor1.VAULT.deposit(depositAmount);
-    let bbalance = await bTokenInstance.balanceOf(depositor1.address);
-    expect(bbalance).to.satisfies(closeTo(depositAmount));
+    expect(await contracts.DAI.balanceOf(depositor1.address)).to.equal("0");
+    expect(await bTokenInstance.balanceOf(depositor1.address)).to.satisfies(closeTo(depositAmount));
+    expect(await vaultInstance.principal()).to.satisfies(closeTo(depositAmount));
+    expect(await vaultInstance.totalBalanceOf(depositor1.address)).to.satisfies(closeTo(depositAmount))
+    // await depositor1.BDAI.approve(vaultInstance.address, depositAmount);
+    // await depositor1.VAULT.withdraw();
+    // expect(await contracts.DAI.balanceOf(depositor1.address)).to.satisfies(closeTo(depositAmount));
   })
 
   it("*T2 Interest surplus accrued by 200 aTokens, \n recipient earns 100 aTokens, \n 100 depositor1 earns 100 aTokens", async function () {
     // @ts-ignore
     await hre.addADaiToWallet(vaultInstance.address, toBaseUnit("200")); // simulate interests earned
     await vaultInstance.manualTransition();
-    let recipientReserve = await vaultInstance.recipientReserve();
     let depositor1Total = await vaultInstance.totalBalanceOf(depositor1.address);
-    expect(recipientReserve).to.equal(toBaseUnit("100"));
+    expect(await vaultInstance.recipientReserve()).to.equal(toBaseUnit("100"));
     expect(depositor1Total).to.satisfies(closeTo(toBaseUnit("1100"))); // off by one
   })
 
@@ -104,11 +97,13 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
     let depositor2Total = await vaultInstance.totalBalanceOf(depositor2.address);
     expect(depositor1Total).to.satisfies(closeTo(toBaseUnit("1204.7")));
     expect(depositor2Total).to.satisfies(closeTo(toBaseUnit("1095.2")));
+    // await deployer.DAI.approve(vaultInstance.address, depositAmount);
+    // await deployer.VAULT.deposit(depositAmount);
+    // let deployerbal = await vaultInstance.totalBalanceOf(depositor2.address);
   })
 
   it("*T5 depositor1 and depositor2 withdraw their entire balance, \n depositor1 receives 1204 Tokens back, \n depositor2 receives 1096 Tokens back", async function () {
     await depositor1.BDAI.approve(vaultInstance.address, toBaseUnit("10000"));
-    let bal = await contracts.ADAI.balanceOf(contracts.AAVE_POOL.address);
     await depositor1.VAULT.withdraw();
     let depositor1TokenBalance = await contracts.DAI.balanceOf(depositor1.address);
     expect(depositor1TokenBalance).to.satisfies(closeTo(toBaseUnit("1204.7")));
@@ -117,6 +112,7 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
     await depositor2.VAULT.withdraw();
     let depositor2TokenBalance = await contracts.DAI.balanceOf(depositor2.address);
     expect(depositor2TokenBalance).to.satisfies(closeTo(toBaseUnit("1095.2")));
+    expect(await vaultInstance.principal()).to.equal("0")
   })
 
   it("*T6 recipient withdraws his salary, \n recipient receives 100 Tokens back", async function () {
@@ -124,5 +120,21 @@ describe("Vault Contract Smoke Test with depositor1, depositor2 and recipient:",
     await recipient.VAULT.recipientWithdraw(toBaseUnit("100"));
     let balanceAfter = await contracts.DAI.balanceOf(recipient.address);
     expect(balanceAfter.sub(balanceBefore)).to.satisfies(closeTo(toBaseUnit("100")));
+  })
+
+  it("*T7 depositor1 deposits again and then withdraw", async function () {
+    await depositor1.DAI.approve(vaultInstance.address, depositAmount);
+    await depositor1.VAULT.deposit(depositAmount);
+    let depositor1TokenBalance = await bTokenInstance.balanceOf(depositor1.address);
+    expect(await vaultInstance.totalBalanceOf(depositor1.address)).to.satisfies(closeTo(depositAmount))
+    await depositor1.BDAI.approve(vaultInstance.address, depositAmount);
+    await depositor1.VAULT.withdraw();
+    // expect(await contracts.DAI.balanceOf(depositor1.address)).to.satisfies(closeTo(depositAmount));
+  })
+  it("*T8 depositor2 deposits again then withdraw", async function () {
+    await depositor2.DAI.approve(vaultInstance.address, depositAmount);
+    await depositor2.VAULT.deposit(depositAmount);
+    await depositor2.BDAI.approve(vaultInstance.address, depositAmount);
+    await depositor2.VAULT.withdraw();
   })
 });

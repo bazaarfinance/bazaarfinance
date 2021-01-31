@@ -13,8 +13,8 @@ async function main() {
 
   let recipient = "0x31567830e4482739Df31D36E5dB47F4FA67ac072"
   const contracts = {
-    AAVE_POOL: "0x9FE532197ad76c5a68961439604C037EB79681F0",
-    ADAI: "0xdcf0af9e59c002fa3aa091a46196b37530fd48a8",
+    AAVE_POOL: "0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe",
+    ADAI: "0xdCf0aF9e59C002FA3AA091a46196b37530FD48a8",
     DAI: "0xff795577d9ac8bd7d90ee22b6c1703490b6512fd"
   }
   const [deployer] = await hre.ethers.getSigners();
@@ -44,7 +44,8 @@ async function main() {
   const bTokenAddress = await vaultFactory.projectIdToBToken(0);
   console.log("bToken deployed at:", bTokenAddress)
 
-  await vaultFactory.createVault(recipient, contracts.DAI, "1000", bTokenAddress, contracts.ADAI);
+  await vaultFactory.createVault(recipient, contracts.DAI, "100", bTokenAddress, contracts.ADAI);
+  await sleep(20000) // TODO need a better way to wait for createBazrToken() transaction to get mined
   const vaultAddress = await vaultFactory.bTokenToVault(bTokenAddress);
 
   console.log("Vault deployed at:", vaultAddress);
