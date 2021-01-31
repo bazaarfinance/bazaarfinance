@@ -56,7 +56,7 @@ function NavBar() {
   return (
     <Container>
       <InnerContainer>
-        <div className="title-container">The Bazaar</div>
+        <div className="title-container">Bazaar Finance</div>
         <EthereumDetail>
           <div>Network: {network.toUpperCase()}</div>
           <div className="address-container">
