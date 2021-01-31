@@ -5,7 +5,7 @@ export function toBaseUnit(amount: string): BigNumber{
   return utils.parseEther(amount);
 }
 
-// compare and ensure that two numbers are within a margin of error
+// comparison requires additional margin due to AAVE streamed interests
 export function closeTo(amount: BigNumber): Function {
   return function(amount2: BigNumber): boolean{
     let dif = amount.gte(amount2) ? amount.mod(amount2) : amount2.mod(amount);

@@ -92,7 +92,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
         });
     }
 
-  async function addADaiToWallet(to: string, amount: string): Promise<void> {
+  async function simulateDAIInterests(to: string, amount: string): Promise<void> {
     // impersonate/unlock a random user account containing dai
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -131,5 +131,5 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
     // @ts-ignore
     hre.initializeEnvironment = initializeEnvironment;
     // @ts-ignore
-    hre.addADaiToWallet = addADaiToWallet;
+    hre.simulateDAIInterests= simulateDAIInterests;
 };
