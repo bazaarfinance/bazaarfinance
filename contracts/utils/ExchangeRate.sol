@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense                                                                                                                                         [0/0]
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 /* exchangeRate = principal + surplusInterest / bTokenTotalSupply */
 
 contract ExchangeRate {
