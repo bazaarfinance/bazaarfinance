@@ -12,7 +12,11 @@ import "@typechain/ethers-v5";
 
 import { extendEnvironment, HardhatUserConfig, task } from "hardhat/config";
 
+<<<<<<< Updated upstream
 import { testEnvironment } from "./test/integration/contracts-integration-test-env";
+=======
+import { testEnvironment } from "./contracts-integration-test-env";
+>>>>>>> Stashed changes
 
 extendEnvironment(testEnvironment);
 
