@@ -103,8 +103,8 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
             bTokensToMint = atokenAmount; // first deposit always 1-1
         }
         bToken.mint(msg.sender, bTokensToMint);
-        depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], atokenAmount);
-        principal = SafeMath.add(principal, atokenAmount);
+        depositorToPrincipal[msg.sender] = depositorToPrincipal[msg.sender].add(atokenAmount);
+        principal = principal.add(atokenAmount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
         if (startedSurplus) {
             _updateCheckpointInterest();
@@ -133,13 +133,12 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         require(aTokenAmount > 0, "amount to withdraw cannot be zero");
         bToken.burn(address(this), balance);
         require(aTokenAmount >= depositorToPrincipal[msg.sender], "atoken must be more than depositorPrincipal");
-        require(depositorReserve >= SafeMath.sub(aTokenAmount, depositorToPrincipal[msg.sender]), "atoken must be more than depositorPrincipal");
-        depositorReserve = SafeMath.sub(
-            depositorReserve,
-            SafeMath.sub(aTokenAmount, depositorToPrincipal[msg.sender])
-            );
+        require(depositorReserve >= aTokenAmount.sub(depositorToPrincipal[msg.sender]), "atoken must be more than depositorPrincipal");
+        depositorReserve = depositorReserve.sub(
+            aTokenAmount.sub(depositorToPrincipal[msg.sender]) 
+        );
         require(principal >= depositorToPrincipal[msg.sender], "principal must be over depositorPrincipal");
-        principal = SafeMath.sub(principal, depositorToPrincipal[msg.sender]);
+        principal = principal.sub(depositorToPrincipal[msg.sender]);
         depositorToPrincipal[msg.sender] = 0;
         // withdraw atokens
         aToken.approve(address(aavePool), aTokenAmount);
@@ -163,7 +162,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         require(_amount > 0, "amount to withdraw cannot be zero");
         aToken.approve(address(aavePool), _amount);
         require(recipientReserve >= _amount, "recipient reserve must be over amount");
-        recipientReserve = SafeMath.sub(recipientReserve, _amount);
+        recipientReserve = recipientReserve.sub(_amount);
         aavePool.withdraw(
             address(token),
             _amount,
@@ -212,48 +211,27 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
                 /* Check if interest earned exceeds salary. If true, adds salary to recipient reserve and any surplus to depositor reserve. */
                 require(totalInterestEarned >= interestEarnedAtLastCheckpoint, "totalInterestEarned must be over interestEarnedAtLastCheckpoint");
                 if (totalInterestEarned.sub(interestEarnedAtLastCheckpoint) >= salary) {
-                    recipientReserve = SafeMath.add(recipientReserve, salary);
-                    depositorReserve = SafeMath.add(
-                        depositorReserve,
-                        SafeMath.sub(
-                            SafeMath.sub(
-                                totalInterestEarned,
-                                interestEarnedAtLastCheckpoint
-                            ), salary));
+                    recipientReserve = recipientReserve.add(salary);
+                    depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint).sub(salary));
                     startedSurplus = true;  /* Set flag to true to direct interest to depositor reserver until next checkpoint */
                 } else {
-                    /* Do nothing until the unallocated interest exceeds the salary */
                     return;
                 }
             } else {
                 require(totalInterestEarned >= interestEarnedAtLastCheckpoint, "totalInterestEarned must be over interestEarnedAtLastCheckpoint");
-                depositorReserve = SafeMath.add(
-                    depositorReserve,
-                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                    );
+                depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
             }
         } else {
             if (!startedSurplus) {
                 if (totalInterestEarned.sub(interestEarnedAtLastCheckpoint) >= salary) {
-                    recipientReserve = SafeMath.add(recipientReserve, salary);
-                    depositorReserve = SafeMath.add(
-                        depositorReserve,
-                        SafeMath.sub(
-                            SafeMath.sub(
-                                totalInterestEarned,
-                                interestEarnedAtLastCheckpoint
-                            ), salary));                }
+                    recipientReserve = recipientReserve.add(salary);
+                    depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint).sub(salary));
+                }
                 else {
-                    recipientReserve = SafeMath.add(
-                        recipientReserve,
-                        SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                        );
+                    recipientReserve = recipientReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
                 }
             } else {
-                depositorReserve = SafeMath.add(
-                    depositorReserve,
-                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                );
+                depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
             }
             _reset();  // always _reset when current time is higher than checkpoint
         }
