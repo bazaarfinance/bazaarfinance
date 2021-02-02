@@ -106,9 +106,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
         depositorToPrincipal[msg.sender] = depositorToPrincipal[msg.sender].add(atokenAmount);
         principal = principal.add(atokenAmount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
-        if (startedSurplus) {
-            _updateCheckpointInterest();
-        }
+        _updateCheckpointInterest();
         emit NewDeposit(msg.sender, atokenAmount);
     }
 
@@ -147,9 +145,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
             aTokenAmount,
             msg.sender
         );
-        if (startedSurplus) {
-            _updateCheckpointInterest();
-        }
+        _updateCheckpointInterest();
         emit DepositorWithdraw(msg.sender, aTokenAmount);
     }
 
@@ -194,10 +190,7 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     /// @notice Convenience function to execute a state transition.
     function manualTransition() public {
         _stateTransition();
-        if(startedSurplus) {
-            _updateCheckpointInterest();
-
-        }
+        _updateCheckpointInterest();
     }
 
 
@@ -246,9 +239,13 @@ contract Vault is ExchangeRate, Initializable, OwnableUpgradeSafe {
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
     function _updateCheckpointInterest() private {
-        require(aToken.balanceOf(address(this)) >= principal, "aToken balance must be more than principal");
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)).sub(principal);
-        interestEarnedAtLastCheckpoint = totalInterestEarned;
+        if(startedSurplus) {
+            require(aToken.balanceOf(address(this)) >= principal, "aToken balance must be more than principal");
+            uint256 totalInterestEarned = aToken.balanceOf(address(this)).sub(principal);
+            interestEarnedAtLastCheckpoint = totalInterestEarned;
+        } else {
+            return;
+        }
     }
 
 }

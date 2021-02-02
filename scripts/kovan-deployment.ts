@@ -37,7 +37,7 @@ async function main() {
   const bTokenAddress = await vaultFactory.projectIdToBToken(0);
   console.log("bToken deployed at:", bTokenAddress)
 
-  let vaultDeploymentTx = await vaultFactory.createVault(recipient, contracts.DAI, procces.env.SALARY, bTokenAddress, contracts.ADAI);
+  let vaultDeploymentTx = await vaultFactory.createVault(recipient, contracts.DAI, process.env.SALARY, bTokenAddress, contracts.ADAI);
   await vaultDeploymentTx.wait();
   const vaultAddress = await vaultFactory.bTokenToVault(bTokenAddress);
 
