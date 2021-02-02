@@ -1,10 +1,10 @@
 {
   "name": "hardhat-project",
+  "homepage": "https://github.com/symfoni/hardhat-react-boilerplate#readme",
   "devDependencies": {
     "@aave/protocol-v2": "^1.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
-    "@openzeppelin/contracts": "^3.3.0",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "@openzeppelin/hardhat-upgrades": "^1.5.0",
     "@openzeppelin/test-helpers": "^0.5.10",
@@ -42,6 +42,5 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/symfoni/hardhat-react-boilerplate/issues"
-  },
-  "homepage": "https://github.com/symfoni/hardhat-react-boilerplate#readme"
+  }
 }

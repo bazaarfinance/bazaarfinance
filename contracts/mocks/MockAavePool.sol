@@ -2,7 +2,6 @@
 pragma solidity ^0.6.12;
 
 import "../BazrToken.sol";
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockAavePool {
     bool public deposited;

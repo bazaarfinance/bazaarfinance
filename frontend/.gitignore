@@ -9,7 +9,8 @@
 /coverage
 
 # production
-/build
+# un-gitignore frontend build dir so it can be deployed to gh-pages/github.io
+#/build
 
 # misc
 .DS_Store

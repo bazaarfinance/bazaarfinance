@@ -10,7 +10,6 @@ import * as dotenv from "dotenv";
 
 import { HardhatUserConfig, task } from "hardhat/config";
 
-
 dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -34,8 +33,8 @@ const config: HardhatUserConfig = {
       forking: {
         url: process.env.FORKING_URL,
         blockNumber: 11712717
-      }
-    }
+      },
+    },
   },
   paths: {
     artifacts: "./artifacts",
