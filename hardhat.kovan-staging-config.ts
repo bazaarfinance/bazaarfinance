@@ -1,6 +1,6 @@
 
 import * as dotenv from "dotenv";
-dotenv.config({ path: "./.env.kovan-staging"});
+dotenv.config({ path: "./.env.kovan-staging" });
 
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
@@ -30,7 +30,7 @@ import { HardhatUserConfig } from "hardhat/config";
  */
 const config: HardhatUserConfig = {
   namedAccounts: {
-    deployer: process.env.DEPLOYER_KEY
+    deployer: process.env.DEPLOYER_PRIVATE_KEY
   },
   networks: {
     kovan: {
@@ -38,7 +38,7 @@ const config: HardhatUserConfig = {
       live: true,
       saveDeployments: true,
       tags: ["staging"],
-      accounts: [process.env.DEPLOYER_KEY]
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY]
     }
   },
   paths: {

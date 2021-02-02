@@ -1,6 +1,6 @@
 
 import * as dotenv from "dotenv";
-dotenv.config({ path: "./.env.integration-tests"});
+dotenv.config({ path: "./.env.integration-tests" });
 
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
@@ -12,11 +12,7 @@ import "@typechain/ethers-v5";
 
 import { extendEnvironment, HardhatUserConfig, task } from "hardhat/config";
 
-<<<<<<< Updated upstream
 import { testEnvironment } from "./test/integration/contracts-integration-test-env";
-=======
-import { testEnvironment } from "./contracts-integration-test-env";
->>>>>>> Stashed changes
 
 extendEnvironment(testEnvironment);
 
@@ -31,6 +27,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: process.env.FORKING_URL,
+        blockNumber: +process.env.BLOCK_NUMBER
       },
     },
   },
