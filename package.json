@@ -1,5 +1,6 @@
 {
   "name": "hardhat-project",
+  "homepage": "https://github.com/symfoni/hardhat-react-boilerplate#readme",
   "devDependencies": {
     "@aave/protocol-v2": "^1.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.1",
@@ -40,6 +41,5 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/symfoni/hardhat-react-boilerplate/issues"
-  },
-  "homepage": "https://github.com/symfoni/hardhat-react-boilerplate#readme"
+  }
 }
