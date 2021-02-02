@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.js": "/bazaarfinance/static/js/main.f7e2b875.chunk.js",
-    "main.js.map": "/bazaarfinance/static/js/main.f7e2b875.chunk.js.map",
+    "main.js": "/bazaarfinance/static/js/main.25411d5a.chunk.js",
+    "main.js.map": "/bazaarfinance/static/js/main.25411d5a.chunk.js.map",
     "runtime-main.js": "/bazaarfinance/static/js/runtime-main.f55c5ffe.js",
     "runtime-main.js.map": "/bazaarfinance/static/js/runtime-main.f55c5ffe.js.map",
     "static/js/2.2e440956.chunk.js": "/bazaarfinance/static/js/2.2e440956.chunk.js",
     "static/js/2.2e440956.chunk.js.map": "/bazaarfinance/static/js/2.2e440956.chunk.js.map",
     "index.html": "/bazaarfinance/index.html",
-    "precache-manifest.99b6380baa90f051e787a8e13cc79cf5.js": "/bazaarfinance/precache-manifest.99b6380baa90f051e787a8e13cc79cf5.js",
+    "precache-manifest.f8e5e35bb40438f17d525f38508209fd.js": "/bazaarfinance/precache-manifest.f8e5e35bb40438f17d525f38508209fd.js",
     "service-worker.js": "/bazaarfinance/service-worker.js",
     "static/js/2.2e440956.chunk.js.LICENSE.txt": "/bazaarfinance/static/js/2.2e440956.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.f55c5ffe.js",
     "static/js/2.2e440956.chunk.js",
-    "static/js/main.f7e2b875.chunk.js"
+    "static/js/main.25411d5a.chunk.js"
   ]
 }

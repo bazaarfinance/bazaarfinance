@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "fff1b1633dc46f714a6e139490f9d866",
+    "revision": "e6017effd0720363916fc68c020245fc",
     "url": "/bazaarfinance/index.html"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/bazaarfinance/static/js/2.2e440956.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "21753bf6c7312c54bf25",
-    "url": "/bazaarfinance/static/js/main.f7e2b875.chunk.js"
+    "revision": "11042550a714e06dfc6a",
+    "url": "/bazaarfinance/static/js/main.25411d5a.chunk.js"
   },
   {
     "revision": "d051f4827e031c3825ef",

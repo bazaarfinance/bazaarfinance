@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/bazaarfinance/precache-manifest.99b6380baa90f051e787a8e13cc79cf5.js"
+  "/bazaarfinance/precache-manifest.f8e5e35bb40438f17d525f38508209fd.js"
 );
 
 self.addEventListener('message', (event) => {
