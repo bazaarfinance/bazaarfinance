@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 import React from 'react';
-import Page from '../components/Page';
+
+import DepositWithdraw from 'components/DepositWithdraw';
+import Page from 'components/Page';
 
 function Home() {
-  return <Page></Page>;
+  return <Page>
+    <DepositWithdraw></DepositWithdraw>
+  </Page>;
 }
 
 export default Home;
