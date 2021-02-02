@@ -15,7 +15,7 @@ enum RoleTypes {
     MINTER_ROLE,
     PAUSER_ROLE
   };
-  
+
 type RoleMappings = {
     [key in keyof typeof RoleTypes]: string;
 }

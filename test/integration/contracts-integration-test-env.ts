@@ -1,12 +1,12 @@
 
-import { Contract, Signer } from "ethers";
+import { Contract, Signer, utils } from "ethers";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-
-const initialDaiAmount = 1000;
+const initialDaiAmount = utils.parseEther("1000");
 const richDaiAccountAddress = '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE';
 const richADaiAccountAddress = '0x62e41b1185023bcc14a465d350e1dde341557925';
+let deployer, depositor1, depositor2, recipient;
 
 
 enum ContractDescriptorKeys {
@@ -47,20 +47,19 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
 
     async function getContracts(): Promise<Contracts> {
         console.info(`bazaar-contracts-integration-test-env plugin: The following deployed contracts are being aysychronously fetched:`);
-        
+
         const contractPromises = Object.keys(contractDescriptors).map(contractDescriptorKey => {
             console.info(`bazaar-contracts-integration-test-env plugin:     ${contractDescriptorKey}: ${contractDescriptors[contractDescriptorKey].address}`);
             return hre.ethers.getContractAt(contractDescriptors[contractDescriptorKey].nameOrAbi, contractDescriptors[contractDescriptorKey].address);
         });
 
         const loadedContracts = await Promise.all(contractPromises);
-        
+
         contracts = {
             DAI: loadedContracts[0],
             ADAI: loadedContracts[1],
             AAVE_POOL: loadedContracts[2]
         };
-    
         return contracts;
     }
 
@@ -87,7 +86,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
         });
     }
 
-  async function addADaiToWallet(to: string, amount: string): Promise<void> {
+  async function simulateDAIInterests(to: string, amount: string): Promise<void> {
     // impersonate/unlock a random user account containing dai
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -111,10 +110,10 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             if (initialized) {
                 return contracts;
             }
-            
+
             contracts = await getContracts();
             await addDaiToWallets();
-    
+
             initialized = true;
 
             return contracts;
@@ -126,5 +125,5 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
     // @ts-ignore
     hre.initializeEnvironment = initializeEnvironment;
     // @ts-ignore
-    hre.addADaiToWallet = addADaiToWallet;
+    hre.simulateDAIInterests= simulateDAIInterests;
 };

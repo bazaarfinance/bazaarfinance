@@ -14,6 +14,8 @@ interface IVaultFactory {
 
 contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
 
+    using SafeMath for uint256;
+
     /***************
     CONSTANTS
     ***************/
@@ -87,35 +89,41 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
 
     /// @notice Deposits `_amount` of `token` into Aave pool and mints equivalent bTokens. 
     /// @param _amount The amount to deposit.
+
     function deposit(uint256 _amount) public whenNotPaused {
+        require(_amount > 0, "amount to deposit cannot be zero");
         _stateTransition();
 
         token.transferFrom(msg.sender, address(this), _amount);
         token.approve(address(aavePool), _amount);
+        uint256 beforeBalance = aToken.balanceOf(address(this));
         aavePool.deposit(
             address(token),
             _amount,
             address(this),
             0
         );
+        require(aToken.balanceOf(address(this)) >= beforeBalance, "atoken balance after deposit must be more than before");
+        uint256 atokenAmount = aToken.balanceOf(address(this)).sub(beforeBalance);
         uint256 bTokensToMint;
-        if (depositorReserve > 0) {
+        if (principal > 0) {
             bTokensToMint = tokenToBtoken(
                           principal,
                           depositorReserve,
                           bToken.totalSupply(),
-                          _amount
+                          atokenAmount
             );
         } else {
-            bTokensToMint = _amount; // first deposit always 1-1
+            bTokensToMint = atokenAmount; // first deposit always 1-1
         }
         bToken.mint(msg.sender, bTokensToMint);
-        depositorToPrincipal[msg.sender] = SafeMath.add(depositorToPrincipal[msg.sender], _amount);
-        principal = SafeMath.add(principal, _amount);
+        depositorToPrincipal[msg.sender] = depositorToPrincipal[msg.sender].add(atokenAmount);
+        principal = principal.add(atokenAmount);
         // we keep track of user's principal, not that with this design- we can't allow user to transfer bToken to each other
         _updateCheckpointInterest();
-        emit NewDeposit(msg.sender, _amount);
+        emit NewDeposit(msg.sender, atokenAmount);
     }
+
 
     /// @notice Withdraws the user's entire balance. 
     function withdraw() public whenNotPaused {
@@ -124,7 +132,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
         uint256 balance = bToken.balanceOf(msg.sender);
         bToken.transferFrom(msg.sender, address(this), balance);
         uint256 aTokenAmount;
-        if (depositorReserve > 0) {
+        if (principal > 0) {
             aTokenAmount = btokenToToken(
                 principal,
                 depositorReserve,
@@ -135,16 +143,19 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
             aTokenAmount = balance;
         }
 
-        depositorReserve = SafeMath.sub(
-            depositorReserve, 
-            SafeMath.sub(aTokenAmount, depositorToPrincipal[msg.sender])
-            );
-        principal = SafeMath.sub(principal, depositorToPrincipal[msg.sender]);
+        require(aTokenAmount > 0, "amount to withdraw cannot be zero");
+        bToken.burn(address(this), balance);
+        require(aTokenAmount >= depositorToPrincipal[msg.sender], "atoken must be more than depositorPrincipal");
+        require(depositorReserve >= aTokenAmount.sub(depositorToPrincipal[msg.sender]), "atoken must be more than depositorPrincipal");
+        depositorReserve = depositorReserve.sub(
+            aTokenAmount.sub(depositorToPrincipal[msg.sender]) 
+        );
+        require(principal >= depositorToPrincipal[msg.sender], "principal must be over depositorPrincipal");
+        principal = principal.sub(depositorToPrincipal[msg.sender]);
         depositorToPrincipal[msg.sender] = 0;
         // withdraw atokens
-        bToken.burn(address(this), balance);
         aToken.approve(address(aavePool), aTokenAmount);
-        aavePool.withdraw(
+        uint256 withdrawn = aavePool.withdraw(
             address(token),
             aTokenAmount,
             msg.sender
@@ -159,8 +170,10 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
         _stateTransition();
         require(msg.sender == recipient);
         require(_amount <= recipientReserve);
+        require(_amount > 0, "amount to withdraw cannot be zero");
         aToken.approve(address(aavePool), _amount);
-        recipientReserve = SafeMath.sub(recipientReserve, _amount);
+        require(recipientReserve >= _amount, "recipient reserve must be over amount");
+        recipientReserve = recipientReserve.sub(_amount);
         aavePool.withdraw(
             address(token),
             _amount,
@@ -188,7 +201,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
     function totalBalanceOf(address _address) public view returns (uint256){
         uint256 balance = bToken.balanceOf(_address);
         uint256 atokenamount;
-        if (depositorReserve > 0) {
+        if (principal > 0) {
             atokenamount = btokenToToken(
                 principal,
                 depositorReserve,
@@ -210,52 +223,33 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
     function _stateTransition() private {
         // totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
         // totalInterestEarned - interestEarnedAtLastCheckpoint will give us the interests we need to allocate
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
+        uint256 totalInterestEarned = aToken.balanceOf(address(this)).sub(principal);
         if (block.timestamp < nextCheckpoint){
             if (!startedSurplus) {
                 /* Check if interest earned exceeds salary. If true, adds salary to recipient reserve and any surplus to depositor reserve. */
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
-                    recipientReserve = SafeMath.add(recipientReserve, salary);
-                    depositorReserve = SafeMath.add(
-                        depositorReserve,
-                        SafeMath.sub(
-                            SafeMath.sub(
-                                totalInterestEarned,
-                                interestEarnedAtLastCheckpoint
-                            ), salary));
+                require(totalInterestEarned >= interestEarnedAtLastCheckpoint, "totalInterestEarned must be over interestEarnedAtLastCheckpoint");
+                if (totalInterestEarned.sub(interestEarnedAtLastCheckpoint) >= salary) {
+                    recipientReserve = recipientReserve.add(salary);
+                    depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint).sub(salary));
                     startedSurplus = true;  /* Set flag to true to direct interest to depositor reserver until next checkpoint */
                 } else {
-                    /* Do nothing until the unallocated interest exceeds the salary */ 
-                    return; 
+                    return;
                 }
             } else {
-                depositorReserve = SafeMath.add(
-                    depositorReserve,
-                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                    );
+                require(totalInterestEarned >= interestEarnedAtLastCheckpoint, "totalInterestEarned must be over interestEarnedAtLastCheckpoint");
+                depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
             }
         } else {
             if (!startedSurplus) {
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint >= salary) {
-                    recipientReserve = SafeMath.add(recipientReserve, salary);
-                    depositorReserve = SafeMath.add(
-                        depositorReserve, 
-                        SafeMath.sub(
-                            SafeMath.sub(
-                                totalInterestEarned,
-                                interestEarnedAtLastCheckpoint
-                            ), salary));                }
-                if (totalInterestEarned - interestEarnedAtLastCheckpoint < salary ) {
-                    recipientReserve = SafeMath.add(
-                        recipientReserve, 
-                        SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                        );
+                if (totalInterestEarned.sub(interestEarnedAtLastCheckpoint) >= salary) {
+                    recipientReserve = recipientReserve.add(salary);
+                    depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint).sub(salary));
+                }
+                else {
+                    recipientReserve = recipientReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
                 }
             } else {
-                depositorReserve = SafeMath.add(
-                    depositorReserve,
-                    SafeMath.sub(totalInterestEarned, interestEarnedAtLastCheckpoint)
-                );
+                depositorReserve = depositorReserve.add(totalInterestEarned.sub(interestEarnedAtLastCheckpoint));
             }
             _reset();  // always _reset when current time is higher than checkpoint
         }
@@ -270,8 +264,13 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
     // this helps us define unallocated interests and should be called on every transactions that affect aToken balance of the contract
     // so that all unallocated interests is always positive
     function _updateCheckpointInterest() private {
-        uint256 totalInterestEarned = aToken.balanceOf(address(this)) - principal;
-        interestEarnedAtLastCheckpoint = totalInterestEarned;
+        if(startedSurplus) {
+            require(aToken.balanceOf(address(this)) >= principal, "aToken balance must be more than principal");
+            uint256 totalInterestEarned = aToken.balanceOf(address(this)).sub(principal);
+            interestEarnedAtLastCheckpoint = totalInterestEarned;
+        } else {
+            return;
+        }
     }
 
 }
