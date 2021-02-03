@@ -1,6 +1,8 @@
-import { Contract } from "ethers";
+import { Contract, BigNumber } from "ethers";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { toBaseUnit } from "./utils/numbers"
+
 
 
 enum ContractDescriptorKeys {
@@ -93,7 +95,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
             async (account) =>
             await daiFaucet.transfer(
                 account.address,
-                process.env.INITIAL_DAI_AMOUNT
+                toBaseUnit(process.env.INITIAL_DAI_AMOUNT)
             )
         ));
 
@@ -108,7 +110,7 @@ export function testEnvironment(hre: HardhatRuntimeEnvironment): void {
     }
   }
 
-    async function simulateDAIInterests(to: string, amount: string): Promise<void> {
+    async function simulateDAIInterests(to: string, amount: BigNumber): Promise<void> {
         try {
             // impersonate/unlock a random user account containing dai
             await hre.network.provider.request({
