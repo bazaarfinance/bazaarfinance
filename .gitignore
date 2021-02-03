@@ -7,7 +7,9 @@ frontend/src/hardhat
 
 .vscode/
 
-.env
 package-lock.json
 yarn-error.log
 
+.env
+.env.integration-tests
+.env.kovan-staging

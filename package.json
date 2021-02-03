@@ -28,11 +28,11 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "test": "npx hardhat test ./test/unit/*.ts",
-    "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/*.ts",
     "deploy:kovan": "npx hardhat --config hardhat.kovan-staging-config.ts run scripts/kovan-deployment.ts --network kovan",
+    "frontend": "cd frontend && npm run start",
     "node": "npx hardhat node --watch",
-    "frontend": "cd frontend && npm run start"
+    "test": "npx hardhat test ./test/unit/**/*.ts",
+    "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/**/*.ts"
   },
   "repository": {
     "type": "git",
