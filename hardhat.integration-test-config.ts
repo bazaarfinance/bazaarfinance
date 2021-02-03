@@ -1,4 +1,7 @@
 
+import * as dotenv from "dotenv";
+dotenv.config({ path: "./.env.integration-tests" });
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy-ethers";
@@ -7,14 +10,9 @@ import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
 
-import * as dotenv from "dotenv";
-
 import { extendEnvironment, HardhatUserConfig, task } from "hardhat/config";
 
-import { testEnvironment } from "./test/integration/contracts-integration-test-env"
-
-
-dotenv.config();
+import { testEnvironment } from "./test/integration/contracts-integration-test-env";
 
 extendEnvironment(testEnvironment);
 
@@ -28,9 +26,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.FORKING_URL
-      }
-    }
+        url: process.env.FORKING_URL,
+        blockNumber: +process.env.BLOCK_NUMBER
+      },
+    },
   },
   paths: {
     artifacts: "./artifacts",
@@ -55,6 +54,3 @@ const config: HardhatUserConfig = {
 
 export default config;
 
-
-
-// 0x66c57bF505A85A74609D2C83E94Aabb26d691E1F

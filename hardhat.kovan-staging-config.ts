@@ -1,4 +1,7 @@
 
+import * as dotenv from "dotenv";
+dotenv.config({ path: "./.env.kovan-staging" });
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy-ethers";
@@ -7,12 +10,8 @@ import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
 
-import * as dotenv from "dotenv";
+import { HardhatUserConfig } from "hardhat/config";
 
-import { HardhatUserConfig, task } from "hardhat/config";
-
-
-dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -31,7 +30,7 @@ dotenv.config();
  */
 const config: HardhatUserConfig = {
   namedAccounts: {
-    deployer: process.env.DEPLOYER_KEY
+    deployer: process.env.DEPLOYER_PRIVATE_KEY
   },
   networks: {
     kovan: {
@@ -39,7 +38,7 @@ const config: HardhatUserConfig = {
       live: true,
       saveDeployments: true,
       tags: ["staging"],
-      accounts: [process.env.DEPLOYER_KEY]
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY]
     }
   },
   paths: {
