@@ -2,6 +2,8 @@
 
 Bazaar Finance allows developers to capture value for their work in open-source software though decentralized finance (DeFi) protocols. Thanks to lending protocols, users around the globe now have a new avenue to fund the open-source tools they find valuable. Not by dipping into their wallets, but via interest earned on their savings. Instead of having to actively give lump sums or set up recurring monthly donations, people can allocate a portion of interest they earn, passively and transparently, with the ability to withdraw their principle at any time.
 
+Bazaar gives OSS developers a recurring, predictable source of income for their work, and an avenue for depositors to earn yield on their savings after the recipinet goals have been met.
+
 **Depositors** pool their contributions towards an OSS project, and the interest earned on the total of deposits gets allocated to the developer that maintains it. This interest is withdrawable by the developer (the **recipient**) at any time. Any additional interest that is surplus to the recipient's stated desired **salary** gets reallocated to depositors.
 
 ### 📖 How it Works (above the hood)
@@ -45,7 +47,7 @@ Example scenario:
 7. Recipients can `withdraw` a specified `amount` at any time.
 8. Depositors can `withdraw` their principal (and any additional interest) at any time.
 
-Note: The `Vault` has sole access to `mint` and `burn` on its associated `bToken`, as these functions need only be called during `deposit` and `withdraw`
+Note: The `Vault` has sole access to `mint` and `burn` on its associated `bToken`, as these functions need only be called during `deposit` and `withdraw`. While recipients can specify an amount they want to withdraw, depositors can only withdraw their entire balance in the current implementation. Additionally due to how internal accounting of deposits is currently implemented, bTokens are non-transferrable.
 
 ### bToken Exchange Rate
 
@@ -74,7 +76,7 @@ The exchange rate between a bToken and the underlying asset is calculated as fol
 - Run unit tests `npx hardhat test`
 - Run integration tests `npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/*.ts` from the main directory
 
-Since the tests fork mainnet for interaction with AAVE, you'll need to interact with a node service such as [Alchemy](http://alchemyapi.io/), which requires an API Key, for tests to work. See `.env-sample` for instructions on setting up a local `.env` file that stores the mainnet `FORKING_URL`
+Since the tests fork mainnet for interaction with AAVE, you'll need to interact with a node service such as [Alchemy](http://alchemyapi.io/), which requires an API Key, for tests to work. See `env-example-files/.env-example` for instructions on setting up a local `.env` file that stores the mainnet `FORKING_URL`
 
 If you encounter this error:
 
@@ -86,10 +88,11 @@ eth_sendRawTransaction
 Reset your account in Metamask.
 
 ## 🚀 Future Goals & TODOs
-- Host immutable footballer data for a given season on IPFS
+- Explore governance features to add new features
+- Allow developers to add their own projects to the platform
+- Allow recipients to adjust parameters (salary, payment period, recipient addresses) for their vaults
 - Add ENS capability to resolve human-readable names to Ethereum addresses
-- Implement upgradable design or autodeprecation
-- Add league admin features to the client web app
+- Implement upgradable design or auto-deprecation
 
 ## ✍🏼 Authors
 Made with ❤️ and ☕️ at [MarketMake hackathon](https://mm.ethglobal.co/) by:
