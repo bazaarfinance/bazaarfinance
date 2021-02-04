@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-ethereum-package/contracts/access/AccessControl.
 import "./lib/ProxyFactory.sol";
 import "./interface/IBazrToken.sol";
 
+import "hardhat/console.sol";
+
 contract VaultFactory is ProxyFactory, AccessControlUpgradeSafe {
   
   uint256 private _nextProjectId;
@@ -32,6 +34,8 @@ contract VaultFactory is ProxyFactory, AccessControlUpgradeSafe {
       _nextProjectId = 0;
       // set up permissions
       _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+      console.log("** VaultFactory.constructor: msg.sender", msg.sender);
     }
 
     /// @dev Creates Vault for a new project
@@ -39,7 +43,7 @@ contract VaultFactory is ProxyFactory, AccessControlUpgradeSafe {
     /// @param salary desired recipient payout for a given time period
     /// @return address of the new Vault
     function createVault(address recipient, address token, uint256 salary, address bToken, address aToken) public returns (address) {
-
+      console.log("** VaultFactory.createVault: msg.sender", msg.sender);
       require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
 
       bytes memory _payload = abi.encodeWithSignature(
@@ -70,7 +74,7 @@ contract VaultFactory is ProxyFactory, AccessControlUpgradeSafe {
     /// @param symbol symbol of bToken
     /// @return address of the new bToken
     function createBazrToken(string memory name, string memory symbol) public returns (address) {
-
+      console.log("** VaultFactory.createBazrToken: msg.sender", msg.sender);
       require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only callable by admin");
 
       bytes memory _payload = abi.encodeWithSignature(

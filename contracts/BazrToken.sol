@@ -4,12 +4,16 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 
+import "hardhat/console.sol";
+
 contract BazrToken is Initializable, ERC20UpgradeSafe {
 
     address public vault;
     address public factory;
 
     function initialize(string memory name, string memory symbol) public initializer {
+        console.log("** BazrToken.initialize: msg.sender", msg.sender);
+
         ERC20UpgradeSafe.__ERC20_init(name, symbol);
         factory = msg.sender;
     }

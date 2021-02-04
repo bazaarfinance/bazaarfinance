@@ -7,6 +7,8 @@ import "@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
 import "./interface/IBazrToken.sol";
 import "./utils/ExchangeRate.sol";
 
+import "hardhat/console.sol";
+
 /// declare IVaultFactory as the Vault Contract has to check hasRole
 interface IVaultFactory {
     function hasRole(bytes32 role, address account) external view returns (bool);
@@ -66,6 +68,9 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
    /// @param _bToken The hexadecimal address of the associated bToken.
    /// @param _aToken The hexadecimal address of the associated aToken.
    function initialize(address _recipient, address _token, address _aavePool, uint _salary, address _bToken, address _aToken, address _owner) public initializer {
+       console.log("** Vault.initialize: msg.sender", msg.sender);
+       console.log("** Vault.initialize: owner", _owner);
+
        __Ownable_init();
         OwnableUpgradeSafe.transferOwnership(_owner);
 

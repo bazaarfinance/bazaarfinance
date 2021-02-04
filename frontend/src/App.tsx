@@ -1,12 +1,12 @@
 import React from 'react';
-import Router from 'Router';
 import { Symfoni } from 'hardhat/SymfoniContext';
+import { Greeter } from './components/Greeter';
 
 function App() {
   return (
     <div className="App">
       <Symfoni autoInit>
-        <Router />
+        <Greeter></Greeter>
       </Symfoni>
     </div>
   );
