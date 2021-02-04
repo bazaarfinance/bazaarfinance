@@ -8,7 +8,7 @@ contract BazrToken is Initializable, ERC20UpgradeSafe {
 
     address public vault;
     address public factory;
-    
+
     function initialize(string memory name, string memory symbol) public initializer {
         ERC20UpgradeSafe.__ERC20_init(name, symbol);
         factory = msg.sender;
@@ -29,5 +29,15 @@ contract BazrToken is Initializable, ERC20UpgradeSafe {
     function setVaultAddress(address _vault) external {
         require(msg.sender == factory, "Only callable by Factory");
         vault = _vault;
+    }
+
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        require(msg.sender == vault, "Only allow vault to call transferFrom");
+        super.transferFrom(sender, recipient, amount);
+    }
+
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
+        require(msg.sender == vault, "Only allow vault to call transfer");
+        super.transfer(recipient, amount);
     }
 }
