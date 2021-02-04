@@ -8,6 +8,7 @@ import "hardhat-deploy-ethers";
 import "hardhat-deploy";
 import "@symfoni/hardhat-react";
 import "hardhat-typechain";
+import "hardhat-abi-exporter";
 import "@typechain/ethers-v5";
 
 import { HardhatUserConfig } from "hardhat/config";
@@ -40,6 +41,11 @@ const config: HardhatUserConfig = {
       tags: ["staging"],
       accounts: [process.env.DEPLOYER_PRIVATE_KEY]
     }
+  },
+  abiExporter: {
+    path: './data/abi',
+    clear: true,
+    only: ['ILendingPool', 'IERC20', 'IVaultFactory', 'BazrToken', 'Vault', 'ProxyFactory']
   },
   paths: {
     artifacts: "./artifacts",
