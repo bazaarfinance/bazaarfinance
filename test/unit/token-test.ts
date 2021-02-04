@@ -18,7 +18,7 @@ describe("Bazaar Token", function () {
   let depositor1Signer;
   let tokenName = "Bazaar Token";
   let tokenSymbol = "BAZR";
-  let testAmount = "1000"
+  let testAmount = "1000";
 
   before(async function () {
     [deployer, vault, depositor1, depositor2] = await hardhat.ethers.getSigners();
@@ -52,12 +52,18 @@ describe("Bazaar Token", function () {
       expect(await bazrToken.balanceOf(depositor1.address)).to.equal(testAmount)
     })
 
-    it("should not allow wallet to send funds to non-vault address", async function () {
+    it("should only allow vault to call transfer", async function () {
       await vaultSigner.mint(depositor1.address, testAmount);
-      await expect(depositor1Signer.transfer(depositor2.address, testAmount)).to.be.revertedWith("Only allow to transfer to or from Vault");
+      await expect(depositor1Signer.transfer(depositor2.address, testAmount)).to.be.revertedWith("Only allow vault to call transfer");
     })
 
-    it("should allow depositor to send funds back to vault", async function () {
+    it("should only allow vault to call transferFrom", async function () {
+      await vaultSigner.mint(vault.address, testAmount);
+      await vaultSigner.approve(depositor1.address, testAmount)
+      await expect(depositor1Signer.transferFrom(vault.address, depositor1.address, testAmount)).to.be.revertedWith("Only allow vault to call transferFrom");
+    })
+
+    it("should allow vault to call transferFrom", async function () {
       await vaultSigner.mint(depositor1.address, testAmount);
       await depositor1Signer.approve(vault.address, testAmount);
       await vaultSigner.transferFrom(depositor1.address, vault.address, testAmount);
