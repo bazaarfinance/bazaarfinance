@@ -2,9 +2,13 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "./IExchangeRate.sol";
 
+/**
+ * @title Vault contract interface
+ */
 
-interface IVault {
+interface IVault is IExchangeRate {
     /* @notice emitted on new deposit */
     /* @param depositor the hexadecimal address of the depositor */
     /* @param amount the amount of the deposit in native aTokens*/
