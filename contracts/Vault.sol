@@ -210,7 +210,8 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
     /// @param _address The address to query the balance for.
     /// @return Balance of the _address in aTokens.
     function totalBalanceOf(address _address) public view returns (uint256){
-        uint256 balance = bToken.balanceOf(_address); uint256 atokenamount;
+        uint256 balance = bToken.balanceOf(_address);
+        uint256 atokenamount;
         if (principal > 0) {
             atokenamount = btokenToToken(
                 principal,
@@ -225,7 +226,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
     }
 
     /// @notice Convenience function to execute a state transition.
-    /// @dev currently contract transition without manualTransition with the assumption that there are enough deposits or withdraw for constant state changes.
+    /// @dev currently contract transition without manualTransition with the assumption that there are enough deposits or withdraws for constant state changes.
     /// @dev manual transition could be called any time if enough interests are earned, or if it's time to move onto the next checkpoint.
     function manualTransition() public {
         _stateTransition();
@@ -234,7 +235,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
 
     /* @notice move the contract state forward */
     /* @dev manages interests allocation of the contract */
-    /* @dev reset the contract to new month if the current block reaches the checkpoint */
+    /* @dev reset the contract to a new month if the current block reaches the checkpoint */
     function _stateTransition() private {
         // @dev totalInterestEarned should always be >= to interestEarnedAtLastCheckpoint
         // @dev totalInterestEarned - interestEarnedAtLastCheckpoint will give us the interests we need to allocate
