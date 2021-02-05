@@ -166,7 +166,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "btokens",
+        "name": "_btokens",
         "type": "uint256"
       }
     ],
@@ -465,7 +465,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "token",
+        "name": "_token",
         "type": "uint256"
       }
     ],

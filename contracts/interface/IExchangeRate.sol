@@ -1,12 +1,7 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-
-/* @title exchange rate calculation */
-/* @notice from bTokens to aTokens and vice versa */
-/* @dev the equation is exchangeRate = principal + surplusInterest / bTokenTotalSupply */
-contract ExchangeRate {
+interface IExchangeRate {
 
     // @notice returns tokens from btokens, pure function
     /* @param _principal amount in underlying asset deposited into the contract  */
@@ -18,9 +13,7 @@ contract ExchangeRate {
                            uint256 _surplus,
                            uint256 _tokenSupply,
                            uint256 _btokens
-                           ) pure public returns (uint256){
-        return SafeMath.div(SafeMath.mul(_btokens, SafeMath.add(_surplus, _principal)), _tokenSupply);
-    }
+                           ) pure external returns (uint256);
 
     // @notice returns btokens from tokens, pure function
     /* @param _principal amount in underlying asset deposited into the contract  */
@@ -32,7 +25,5 @@ contract ExchangeRate {
                            uint256 _surplus,
                            uint256 _tokenSupply,
                            uint256 _token
-                           ) pure public returns (uint256){
-        return SafeMath.div(SafeMath.mul(_token, (_tokenSupply)), SafeMath.add(_surplus, _principal));
-    }
+                           ) pure external returns (uint256);
 }
