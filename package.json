@@ -1,6 +1,6 @@
 {
-  "name": "hardhat-project",
-  "homepage": "https://github.com/symfoni/hardhat-react-boilerplate#readme",
+  "name": "bazaar-finance",
+  "homepage": "https://github.com/bazaarfinance/bazaarfinance/blob/master/README.md",
   "devDependencies": {
     "@aave/protocol-v2": "^1.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.1",
@@ -13,8 +13,13 @@
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.0.4",
     "@types/node": "^14.14.9",
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "ethereum-waffle": "^3.2.0",
     "ethers": "^5.0.26",
     "hardhat": "^2.0.4",
@@ -22,6 +27,12 @@
     "hardhat-deploy": "^0.7.0-beta.35",
     "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "hardhat-typechain": "^0.3.3",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.3",
+    "pretty-quick": "^3.1.0",
+    "solc": "^0.8.1",
+    "solhint": "^3.3.2",
+    "solhint-plugin-prettier": "^0.0.5",
     "ts-generator": "^0.1.1",
     "ts-morph": "^9.0.0",
     "ts-node": "^9.0.0",
@@ -31,17 +42,20 @@
   "scripts": {
     "deploy:kovan": "npx hardhat --config hardhat.kovan-staging-config.ts run scripts/kovan-deployment.ts --network kovan",
     "frontend": "cd frontend && npm run start",
+    "lint": "eslint --ext=.js,.jsx,.ts,.tsx .",
+    "lint:fix": "eslint ---fix -ext=.js,.jsx,.ts,.tsx .",
     "node": "npx hardhat node --watch",
+    "solhint": "npx solhint -f table contracts/**/*.sol",
     "test": "npx hardhat test ./test/unit/**/*.ts",
     "test-integration": "npx hardhat --config hardhat.integration-test-config.ts test ./test/integration/**/*.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/symfoni/hardhat-react-boilerplate.git"
+    "url": "git+https://github.com/bazaarfinance/bazaarfinance.git"
   },
-  "author": "Robertosnap",
+  "author": "Bazaar Finance Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/symfoni/hardhat-react-boilerplate/issues"
+    "url": "https://github.com/bazaarfinance/bazaarfinance.git/issues"
   }
 }
