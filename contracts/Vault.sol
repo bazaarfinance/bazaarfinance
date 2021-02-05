@@ -145,7 +145,7 @@ contract Vault is ExchangeRate, OwnableUpgradeSafe, PausableUpgradeSafe {
         require(aTokenAmount > 0, "amount to withdraw cannot be zero");
         bToken.burn(address(this), balance);
         require(aTokenAmount >= depositorToPrincipal[msg.sender], "atoken must be more than depositorPrincipal");
-        require(depositorReserve >= aTokenAmount.sub(depositorToPrincipal[msg.sender]), "atoken must be more than depositorPrincipal");
+        require(depositorReserve >= aTokenAmount.sub(depositorToPrincipal[msg.sender]), "depositorReserve must be more than the leftover aToken amount");
         depositorReserve = depositorReserve.sub(
             aTokenAmount.sub(depositorToPrincipal[msg.sender])
         );

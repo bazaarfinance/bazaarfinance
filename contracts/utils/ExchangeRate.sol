@@ -11,6 +11,7 @@ contract ExchangeRate {
     // @notice returns tokens from btokens, pure function
     /* @param _principal amount in underlying asset deposited into the contract  */
     /* @param _surplus the interests earned that belong to the depositorReserve */
+    /* @param _tokenSupply the total supply for the Bazr Token*/
     /* @param _btokens the depositor's btokens amount to convert to underlying tokens */
     /* @return amount in underlying tokens to return to depositor */
     function btokenToToken(uint256 _principal,
@@ -24,7 +25,8 @@ contract ExchangeRate {
     // @notice returns btokens from tokens, pure function
     /* @param _principal amount in underlying asset deposited into the contract  */
     /* @param _surplus the interests earned that belong to the depositorReserve */
-    /* @param _btokens the depositor's btokens amount to convert to underlying tokens */
+    /* @param _tokenSupply the total supply for the Bazr Token*/
+    /* @param _tokens the depositor's btokens amount to convert to underlying tokens */
     /* @return amount amount in btokens to mint to users */
     function tokenToBtoken(uint256 _principal,
                            uint256 _surplus,
