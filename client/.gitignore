@@ -9,7 +9,9 @@ node_modules
 coverage
 
 # production
-build
+
+# commented out so build dir gets checked and published on github.io
+# build
 
 # misc
 .DS_Store
