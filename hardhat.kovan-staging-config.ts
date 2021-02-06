@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
   abiExporter: {
     path: './data/abi',
     clear: true,
-    only: ['ILendingPool', 'IERC20', 'IVaultFactory', 'BazrToken', 'Vault', 'ProxyFactory']
+    only: ['ILendingPool', 'IERC20', 'VaultFactory', 'BazrToken', 'Vault', 'ProxyFactory']
   },
   paths: {
     artifacts: "./artifacts",
