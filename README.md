@@ -70,10 +70,10 @@ The exchange rate between a bToken and the underlying asset is calculated as fol
 - Clone the repo using `git clone https://github.com/bazaarfinance/bazaarfinance.git && cd bazaarfinance`
 - Install deps with yarn `yarn` or npm `npm install`
 - To start the client locally, start hardhat `npx hardhat node --watch`
-- From a new terminal window and install dependencies `cd frontend && yarn install` or `cd frontend && npm install`
+- From a new terminal window and install dependencies `cd client && yarn install` or `cd frontend && npm install`
 - Import seed phrase in Metamask. The default mnemonic currently used by hardhat is `test test test test test test test test test test test junk`
 - Ensure Metamask RPC is set to `http://localhost:8545` and chainID `31337`.
-- Run `yarn start` or npm `npm start` and a new browser window should open up at http://localhost:3000/
+- Run `yarn frontend:start` or npm `npm run frontend:start` and a new browser window should open up at http://localhost:3000/
 
 ## ✅ Testing
 - Run unit tests `npx hardhat test`

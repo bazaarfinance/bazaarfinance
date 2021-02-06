@@ -55,6 +55,6 @@ https://docs.github.com/en/github/working-with-github-pages/configuring-a-custom
    domain. Edit `client/packages/react-app/package.json` and set `"homepage": "CNAME_OF_CUSTOM_URL"`
 3. Setup a `predeploy` task `client/packages/react-app/package.json` to copy the CNAME file to the
    build dir. See here:
-   https://github.com/bazaarfinance/bazaarfinance/blob/gh-pages-new-client-frontend/client/packages/react-app/package.json#L53
+   https://github.com/bazaarfinance/bazaarfinance/blob/master/client/packages/react-app/package.json#L53
 
 And done!
