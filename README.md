@@ -1,4 +1,7 @@
 # Bazaar Finance
+![Bazaar.finance](https://user-images.githubusercontent.com/20870134/107111907-3fc95e80-6886-11eb-8ad5-83250a00f566.png)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 Bazaar Finance allows developers to capture value for their work in open-source software though decentralized finance (DeFi) protocols. Thanks to lending protocols, users around the globe now have a new avenue to fund the open-source tools they find valuable. Not by dipping into their wallets, but via interest earned on their savings. Instead of having to actively give lump sums or set up recurring monthly donations, people can allocate a portion of interest they earn, passively and transparently, with the ability to withdraw their principle at any time.
 
