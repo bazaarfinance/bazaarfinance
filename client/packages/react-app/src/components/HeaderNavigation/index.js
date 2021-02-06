@@ -8,7 +8,7 @@ import { HeaderNavigationLink } from '../../theme'
 const StyledLink = styled(Link)`
     display: flex;
     align-items: center;
-    font-family: Ubuntu;
+    font-family: Open Sans;
     text-decoration: none;
     font-size: 1rem;
     :hover {

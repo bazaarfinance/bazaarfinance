@@ -25,7 +25,7 @@ export function Projects() {
     <>
       <Jumbotron ref={headingRef}>
         <JumbotronColumn>
-            <MainHeader>Fund Project</MainHeader>
+            <MainHeader>Discover Projects</MainHeader>
         </JumbotronColumn>
         <JumbotronColumn>
         <Button onClick={async () => {

@@ -43,7 +43,7 @@ const StyledDialogContent = styled(FilteredDialogContent)`
         display: flex;
         overflow: scroll;
         border-radius: 10px;
-        font-family: Ubuntu;
+        font-family: Open Sans;
     }
 `
 
