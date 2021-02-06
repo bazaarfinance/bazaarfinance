@@ -1,14 +1,19 @@
 import React, { useState, useRef } from 'react'
+import styled from 'styled-components'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
-import styled from 'styled-components'
-import BigNumber from 'bignumber.js'
 import { addresses } from "@project/contracts";
 import { MaxUint256 } from '@ethersproject/constants'
+import BigNumber from 'bignumber.js'
 import { useVaultContract, useERC20Contract } from '../../hooks'
 import { BorderlessInput, Button } from '../../theme'
 import Modal from '../Modal'
 import { ReactComponent as Close } from '../../assets/img/x.svg'
+
+import aaveLogo from '../../assets/img/logo_aave.png'
+import aDaiLogo from '../../assets/img/logo_adai.png'
+import hardhat from '../../assets/img/hardhat.png'
+import progressBar from '../../assets/img/progress_bar.png'
 
 const GAS_MARGIN = ethers.BigNumber.from(1000)
 BigNumber.config({ EXPONENTIAL_AT: 30 })
@@ -18,26 +23,112 @@ const ModalHeader = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px 0px 0px 1rem;
-  height: 60px;
+  margin-bottom: 0.7rem;
+  height: 20px;
   background: ${({ theme }) => theme.secondaryRed};
-  color: white};
+  color: black;
 `
 
 const InputRow = styled.div`
   ${({ theme }) => theme.flexRowNoWrap}
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0.85rem 0.75rem;
-  margin: 2% 3% 0 3%;
+  width: 40%;
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  margin-left: 2%;
+`
+
+const ButtonsRow = styled.div`
+  ${({ theme }) => theme.flexRowNoWrap}
+  align-items: center;
+  justify-content: space-between;
+  margin: 1% 3% 0 3%;
+  padding-bottom: 3%;
 `
 
 const Input = styled(BorderlessInput)`
   font-size: 1rem;
-  padding: 0.2rem;
+  padding: 0.5rem;
   color: ${({ error, theme }) => error && theme.pink};
-  background-color: ${({ theme }) => theme.chaliceGray};
+  background-color: ${({ theme }) => theme.placeholderGray};
   -moz-appearance: textfield;
+`
+
+const Icon = styled.img`
+  width: 30px;
+  height: 30px;
+`
+
+const Logo = styled.img`
+  width: 50%;
+  height: 100%;
+  margin-top: 2rem;
+  align-self: center;
+`
+
+const ProgressBar = styled.img`
+  width: 70%;
+  height: 10%;
+`
+
+const DetailsModal = styled.div`
+  ${({ theme }) => theme.flexColumnNoWrap}
+  width: 100%;
+`
+
+const DetailsRow = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+  #projectStatus {
+    padding-left: 8%;
+  }
+`
+
+const DetailsColumn = styled.div`
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  width: 50%;
+  line-height: 1.2rem;
+`
+
+const PoweredByContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  margin-top: 1.5rem;
+  #poweredBy {
+    font-weight: 900;
+    font-size: 1rem;
+    align-self: right;
+    padding-left: 3rem;
+  }
+`
+
+const Info = styled.p`
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 5px;
+  line-height: 0.7rem;
+`
+
+const InfoTitle = styled.p`
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1rem;
+`
+
+const ProjectTitle = styled.h1`
+  font-size: 1.4rem;
+  font-weight: 900;
+  align-self: left;
 `
 
 const CloseIcon = styled.div`
@@ -48,10 +139,6 @@ const CloseIcon = styled.div`
     cursor: pointer;
     opacity: 0.6;
   }
-`
-const DetailsModal = styled.div`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  width: 100%;
 `
 
 const CloseColor = styled(Close)`
@@ -68,15 +155,20 @@ export default function ProjectDetailsModal({
     errorMessage,
     isOpen,
     onDismiss,
-    recipient,
+    bTokenBalance,
     salary,
-    startedSurplus,
-    principal
+    recipientReserve,
+    principal,
+    valueLocked,
+    daiAllowance,
+    bTokenAllowance
     }) {
 
     const inputRef = useRef()
 
     const [deposit, setDeposit] = useState('')
+    const [daiApproved, setDaiApproved] = useState(false)
+    const [bTokenApproved, setBTokenApproved] = useState(false)
     
     const { account } = useWeb3React()
 
@@ -96,17 +188,45 @@ export default function ProjectDetailsModal({
             minHeight={60}
             initialFocusRef={inputRef}>
         <DetailsModal>
-            <ModalHeader>
-                Bazaar Finance
-            <CloseIcon onClick={clearInputAndDismiss}>
-                <CloseColor alt={'close icon'} />
-            </CloseIcon>
-            </ModalHeader>
-          <p>Recipient: {recipient}</p>
-          <p>Salary: {salary.toString()}</p>
-          <p>Principal: {principal.toString()}</p>
-          <p>Started Surplus? {startedSurplus ? "Yes!" : "No"}</p>
-          <InputRow>
+          <ModalHeader>
+          <CloseIcon onClick={clearInputAndDismiss}>
+              <CloseColor alt={'close icon'} />
+          </CloseIcon>
+          </ModalHeader>
+          <DetailsRow>
+          <DetailsColumn>
+              <Logo src={hardhat} alt="hardhat"/>
+          </DetailsColumn>
+            <DetailsColumn>
+              <ProjectTitle>Hardhat</ProjectTitle>
+              <p>Ethereum development environment for professionals</p>
+              <PoweredByContainer><Icon src={aDaiLogo} alt="aDai"/>
+                <Info id="poweredBy">Powered by</Info><Icon src={aaveLogo} alt="aave"/>
+              </PoweredByContainer>
+          </DetailsColumn>
+          <DetailsColumn>
+            <InfoTitle>Your bToken Balance:</InfoTitle>
+            <Info>{bTokenBalance}</Info>
+            <InfoTitle>Principal:</InfoTitle>
+            <Info>{principal}</Info>
+          </DetailsColumn>
+          </DetailsRow>
+          <DetailsRow>
+            <DetailsColumn id="projectStatus">
+              <InfoTitle>Total Value Locked (aDAI):</InfoTitle>
+              <Info>{valueLocked}</Info>
+              <InfoTitle>Monthly Income Goal (DAI):</InfoTitle>
+              <Info>{salary}</Info>
+              <InfoTitle>Total Raised:</InfoTitle>
+              <Info>{recipientReserve}</Info>
+            </DetailsColumn>
+            <DetailsColumn id="projectStatus">
+              <DetailsRow><InfoTitle>Raised/Earned Ratio</InfoTitle></DetailsRow>
+              <ProgressBar src={progressBar} alt="progressBar"/>
+              <DetailsRow><InfoTitle>Interest Rate: 10% APY</InfoTitle></DetailsRow>
+          </DetailsColumn>
+          </DetailsRow>
+          { daiAllowance.toString() !== '0' || daiApproved ? <InputRow>
             <Input
               ref={inputRef}
               type="number"
@@ -126,33 +246,33 @@ export default function ProjectDetailsModal({
               }}
               value={deposit}
             />
-          </InputRow>
-          <InputRow>
+          </InputRow> : null}
+          <ButtonsRow>
             <Button onClick={async () => {
             const allowance = await dai.allowance(account, addresses.vault);
             const depositAmount = ethers.BigNumber.from(deposit)
             try {
-              if (allowance.toString() !== '0') {
+              if (allowance.toString() !== '0' || daiApproved) {
                   let estimatedGas = await vault.estimateGas.deposit(depositAmount)
                   let depositTx = await vault.deposit(depositAmount, {
                   gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
                   })
                   console.log(depositTx)
               } else {
-                  let estimatedGas = await dai.estimateGas.approve(addresses.vault, depositAmount)
-                  let approveDaiTx = await dai.approve(addresses.vault, depositAmount, {
+                  let estimatedGas = await dai.estimateGas.approve(addresses.vault, MaxUint256)
+                  let approveDaiTx = await dai.approve(addresses.vault, MaxUint256, {
                       gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
                   });
                   console.log(approveDaiTx)
+                  setDaiApproved(true)
               }
             } catch (err) {
               console.log(err)
             }
-          }}>Deposit</Button>
-          <Button onClick={async () => {
-            const allowance = await bToken.allowance(account, addresses.vault);
+          }}>{daiAllowance.toString() !== '0' || daiApproved ? 'Deposit' : 'Approve Token'}</Button>
+          { bTokenBalance > 0 ? <Button onClick={async () => {
             try {
-              if (allowance.toString() !== '0') {
+              if (bTokenAllowance.toString() !== '0' || bTokenApproved) {
                 let estimatedGas = await vault.estimateGas.withdraw()
                 let withdrawTx = await vault.withdraw({
                 gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
@@ -164,12 +284,13 @@ export default function ProjectDetailsModal({
                 gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
                 })
                 console.log(approveTx)
+                setBTokenApproved(true)
               }
             } catch (err) {
                 console.log(err)
             }
-          }}>Withdraw</Button>
-        </InputRow>
+          }}>{bTokenAllowance.toString() !== '0' || bTokenApproved ? 'Withdraw' : 'Approve bToken'}</Button> : null }
+        </ButtonsRow>
       </DetailsModal>
     </Modal>
     )

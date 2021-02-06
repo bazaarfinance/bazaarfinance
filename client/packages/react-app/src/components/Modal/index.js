@@ -22,17 +22,17 @@ const StyledDialogOverlay = styled(WrappedDialogOverlay).attrs({
 const FilteredDialogContent = ({ minHeight, ...rest }) => <DialogContent {...rest} />
 const StyledDialogContent = styled(FilteredDialogContent)`
     &[data-reach-dialog-content] {
-        margin: 0 0 2rem 0;
+        margin: 2rem 0 2rem 0;
         border: 1px solid ${({ theme }) => theme.concreteGray};
         background-color: ${({ theme }) => theme.inputBackground};
         box-shadow: 0 4px 8px 0 ${({ theme }) => transparentize(0.95, '#333333')};
         ${({ theme }) => theme.mediaWidth.upToMedium`margin: 0;`};
         padding: 0px;
-        width: 75vw;
-        max-width: 800px;
+        width: 80vw;
+        max-width: 900px;
         ${({ theme }) => theme.mediaWidth.upToMedium`width: 65vw;`}
         ${({ theme }) => theme.mediaWidth.upToSmall`width: 85vw;`}
-        max-height: 75vh;
+        max-height: 80vh;
         ${({ minHeight }) =>
         minHeight &&
         css`
