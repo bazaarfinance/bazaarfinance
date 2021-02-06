@@ -17,8 +17,7 @@
     "react-app:eject": "yarn workspace @project/react-app eject",
     "react-app:start": "yarn workspace @project/react-app start",
     "react-app:test": "yarn workspace @project/react-app test",
-    "react-app:predeploy": "yarn workspace @project/react-app build",
-    "react-app:deploy": "yarn react-app:predeploy && yarn workspace @project/react-app gh-pages -b gh-pages -d packages/react-app/build"
+    "react-app:deploy": "yarn workspace @project/react-app deploy"
   },
   "workspaces": {
     "nohoist": [
