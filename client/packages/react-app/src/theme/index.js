@@ -48,6 +48,7 @@ const theme = () => ({
     // reds
     primaryRed: '#9b3f3f',
     secondaryRed: '#d38f8f',
+    headerFooterRed: '#F9BBBB',
     walletStatusOrange: '#F7C28E',
 
     // blues

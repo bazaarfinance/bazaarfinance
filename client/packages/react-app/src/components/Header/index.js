@@ -9,7 +9,7 @@ const HeaderFrame = styled.div`
   height: 10vh;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(180deg, #9b3f3f 0%, rgba(255, 255, 255, 0) 100%), #d38f8f;
+  background: ${({ theme }) => theme.headerFooterRed};
 `
 
 const HeaderElement = styled.div`
@@ -27,6 +27,7 @@ const ExternalLink = styled.a.attrs({
     text-decoration: none;
     cursor: pointer;
     color: #7c1818;
+    font-weight: 800;
     padding-left: 10px;
     :focus {
       outline: none;
@@ -59,16 +60,16 @@ const Title = styled.div`
   }
   #title {
     display: inline;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-right: 25px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-right: 35px;
     font-family: Open Sans;
     color: ${({ theme }) => theme.lightText};
   }
   #navigation {
     display: inline;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-right: 15px;
     color: ${({ theme }) => theme.lightText};
     :hover {

@@ -92,6 +92,7 @@ export function Projects() {
   const [selectedProjectValueLocked, setSelectedProjectValueLocked] = useState(0)
   const [daiAllowance, setDaiAllowance] = useState(0)
   const [bTokenAllowance, setBTokenAllowance] = useState(0)
+  const [selectedProjectDepositorBalance, setSelectedProjectDepositorBalance] = useState(0)
         
   return (
     <>
@@ -118,11 +119,13 @@ export function Projects() {
                 const valueLocked = await aDai.balanceOf(addresses.vault);
                 const daiAllowance = await dai.allowance(account, addresses.vault);
                 const bTokenAllowance = await bToken.allowance(account, addresses.vault);
+                const depositorBalance = await vault.totalBalanceOf(account);
                 setSelectedProjectSalary(salary);
                 setSelectedProjectBTokenBalance(bTokenBalance);
                 setSelectedProjectPrincipal(principal);
                 setSelectedProjectValueLocked(valueLocked);
                 setSelectedProjectRecipientReserve(recipientReserve);
+                setSelectedProjectDepositorBalance(depositorBalance);
                 setDaiAllowance(daiAllowance);
                 setBTokenAllowance(bTokenAllowance);
                 setProjectDetailsModalIsOpen(true);
@@ -136,6 +139,7 @@ export function Projects() {
               recipientReserve={ethers.utils.formatEther(selectedProjectRecipientReserve)}
               principal={ethers.utils.formatEther(selectedProjectPrincipal)}
               valueLocked={ethers.utils.formatEther(selectedProjectValueLocked)}
+              depositorBalance={ethers.utils.formatEther(selectedProjectDepositorBalance)}
               isOpen={projectDetailsModalIsOpen}
               daiAllowance={daiAllowance.toString()}
               bTokenAllowance={bTokenAllowance.toString()}

@@ -8,7 +8,7 @@ const FooterFrame = styled.div`
   justify-content: space-between;
   width: 100vw;
   height: 10vh;
-  background: linear-gradient(180deg, #d38f8f 0%, rgba(255, 255, 255, 0) 100%), #9b3f3f;
+  background: ${({ theme }) => theme.headerFooterRed};
 `
 
 const ExternalLink = styled.a.attrs({
@@ -51,7 +51,7 @@ const Title = styled.div`
   }
   #title {
     display: inline;
-    font-size: 0.825rem;
+    font-size: 0.9rem;
     font-weight: 400;
     margin-right: 12px;
     color: ${({ theme }) => theme.lightText};
