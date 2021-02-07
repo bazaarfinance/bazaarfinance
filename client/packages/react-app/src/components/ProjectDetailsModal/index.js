@@ -8,12 +8,15 @@ import BigNumber from 'bignumber.js'
 import { useVaultContract, useERC20Contract } from '../../hooks'
 import { BorderlessInput, Button } from '../../theme'
 import Modal from '../Modal'
+import truncate from 'truncate-middle';
 import { ReactComponent as Close } from '../../assets/img/x.svg'
+
+import { Line } from 'rc-progress';
+
 
 import aaveLogo from '../../assets/img/logo_aave.png'
 import aDaiLogo from '../../assets/img/logo_adai.png'
 import hardhat from '../../assets/img/hardhat.png'
-import progressBar from '../../assets/img/progress_bar.png'
 
 const GAS_MARGIN = ethers.BigNumber.from(1000)
 BigNumber.config({ EXPONENTIAL_AT: 30 })
@@ -65,9 +68,10 @@ const Logo = styled.img`
   align-self: center;
 `
 
-const ProgressBar = styled.img`
-  width: 70%;
-  height: 10%;
+const ProgressBar = styled.div`
+  width: 80%;
+  height: 21%;
+  margin-left: 5%;
 `
 
 const DetailsModal = styled.div`
@@ -161,7 +165,8 @@ export default function ProjectDetailsModal({
     valueLocked,
     daiAllowance,
     bTokenAllowance,
-    depositorBalance
+    depositorBalance,
+    recipientAddress
     }) {
 
     const inputRef = useRef()
@@ -200,6 +205,8 @@ export default function ProjectDetailsModal({
             <DetailsColumn>
               <ProjectTitle>Hardhat</ProjectTitle>
               <p>Ethereum development environment for professionals</p>
+              <InfoTitle>Recipient Address:</InfoTitle>
+              <Info><a href="https://kovan.etherscan.io/address/{recipientAddress}">{truncate(recipientAddress, 6, 4, '...')}</a></Info>
               <PoweredByContainer><Icon src={aDaiLogo} alt="aDai"/>
                 <Info id="poweredBy">Powered by</Info><Icon src={aaveLogo} alt="aave"/>
               </PoweredByContainer>
@@ -224,7 +231,9 @@ export default function ProjectDetailsModal({
             </DetailsColumn>
             <DetailsColumn id="projectStatus">
               <DetailsRow><InfoTitle>Raised/Earned Ratio</InfoTitle></DetailsRow>
-              <ProgressBar src={progressBar} alt="progressBar"/>
+                <ProgressBar>
+                  <Line percent="50" strokeWidth="5" strokeColor="#F9BBBB" /> 
+                </ProgressBar>
               <DetailsRow><InfoTitle>Interest Rate: 10% APY</InfoTitle></DetailsRow>
           </DetailsColumn>
           </DetailsRow>
