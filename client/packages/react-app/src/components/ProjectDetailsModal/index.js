@@ -164,6 +164,7 @@ export default function ProjectDetailsModal({
     principal,
     valueLocked,
     daiAllowance,
+    daiBalanceDepositor,
     bTokenAllowance,
     depositorBalance,
     recipientAddress
@@ -236,8 +237,14 @@ export default function ProjectDetailsModal({
                 </ProgressBar>
               <DetailsRow><InfoTitle>Interest Rate: 10% APY</InfoTitle></DetailsRow>
           </DetailsColumn>
-          </DetailsRow>
+          </DetailsRow>         
           { daiAllowance.toString() !== '0' || daiApproved ? <InputRow>
+          <DetailsRow>
+            <DetailsColumn id="daiBalanceDepositor">
+              <InfoTitle>Dai Available to Deposit:</InfoTitle>
+              <Info>{daiBalanceDepositor}</Info>
+            </DetailsColumn>
+          </DetailsRow>           
             <Input
               ref={inputRef}
               type="number"
@@ -304,7 +311,7 @@ export default function ProjectDetailsModal({
             } catch (err) {
                 console.log(err)
             }
-          }}>{bTokenAllowance.toString() !== '0' || bTokenApproved ? 'Withdraw' : 'Approve bToken'}</Button> : null }
+          }}>{bTokenAllowance.toString() !== '0' || bTokenApproved ? 'Withdraw All' : 'Approve bToken'}</Button> : null }
         </ButtonsRow>
       </DetailsModal>
     </Modal>
