@@ -25,7 +25,6 @@ const ModalHeader = styled.div`
   align-items: center;
   margin-bottom: 0.7rem;
   height: 20px;
-  background: ${({ theme }) => theme.secondaryRed};
   color: black;
 `
 
@@ -161,7 +160,8 @@ export default function ProjectDetailsModal({
     principal,
     valueLocked,
     daiAllowance,
-    bTokenAllowance
+    bTokenAllowance,
+    depositorBalance
     }) {
 
     const inputRef = useRef()
@@ -205,10 +205,12 @@ export default function ProjectDetailsModal({
               </PoweredByContainer>
           </DetailsColumn>
           <DetailsColumn>
-            <InfoTitle>Your bToken Balance:</InfoTitle>
-            <Info>{bTokenBalance}</Info>
+            <InfoTitle>Your Balance:</InfoTitle>
+            <Info>{depositorBalance}</Info>
             <InfoTitle>Principal:</InfoTitle>
             <Info>{principal}</Info>
+            <InfoTitle>Interest Earned:</InfoTitle>
+            <Info>{depositorBalance - principal}</Info>
           </DetailsColumn>
           </DetailsRow>
           <DetailsRow>
@@ -250,14 +252,15 @@ export default function ProjectDetailsModal({
           <ButtonsRow>
             <Button onClick={async () => {
             const allowance = await dai.allowance(account, addresses.vault);
-            const depositAmount = ethers.BigNumber.from(deposit)
             try {
               if (allowance.toString() !== '0' || daiApproved) {
+                  const depositAmount = ethers.utils.parseEther(deposit)
                   let estimatedGas = await vault.estimateGas.deposit(depositAmount)
                   let depositTx = await vault.deposit(depositAmount, {
                   gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
                   })
                   console.log(depositTx)
+                  clearInputAndDismiss()
               } else {
                   let estimatedGas = await dai.estimateGas.approve(addresses.vault, MaxUint256)
                   let approveDaiTx = await dai.approve(addresses.vault, MaxUint256, {
@@ -265,6 +268,7 @@ export default function ProjectDetailsModal({
                   });
                   console.log(approveDaiTx)
                   setDaiApproved(true)
+                  clearInputAndDismiss()
               }
             } catch (err) {
               console.log(err)
@@ -278,6 +282,7 @@ export default function ProjectDetailsModal({
                 gasLimit: calculateGasMargin(estimatedGas, GAS_MARGIN)
                 })
                 console.log(withdrawTx)
+                clearInputAndDismiss()
               } else {
                 let estimatedGas = await bToken.estimateGas.approve(addresses.vault, MaxUint256);
                 let approveTx = await bToken.approve(addresses.vault, MaxUint256, {
@@ -285,6 +290,7 @@ export default function ProjectDetailsModal({
                 })
                 console.log(approveTx)
                 setBTokenApproved(true)
+                clearInputAndDismiss()
               }
             } catch (err) {
                 console.log(err)
