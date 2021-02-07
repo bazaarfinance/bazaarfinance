@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://bazaarfinance.github.io/",
+  "homepage": "https://thebazaar.finance/",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -26,7 +26,8 @@
     "web3modal": "^1.9.1"
   },
   "scripts": {
-    "predeploy": "npm run build",
+    "copy:cname": "cp ./CNAME ./build/CNAME",
+    "predeploy": "yarn build && yarn copy:cname",
     "deploy": "gh-pages -b gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",

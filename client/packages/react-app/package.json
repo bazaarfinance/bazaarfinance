@@ -1,7 +1,7 @@
 {
   "name": "@project/react-app",
   "version": "1.0.0",
-  "homepage": "./",
+  "homepage": "https://thebazaar.finance",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -51,8 +51,11 @@
   },
   "scripts": {
     "build": "react-scripts build",
+    "copy:cname": "cp ./CNAME ./build/CNAME",
     "eject": "react-scripts eject",
     "start": "react-scripts start",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "predeploy": "yarn build && yarn copy:cname",
+    "deploy": "gh-pages -b gh-pages -d build"
   }
 }

@@ -41,7 +41,8 @@
   },
   "scripts": {
     "deploy:kovan": "npx hardhat --config hardhat.kovan-staging-config.ts run scripts/kovan-deployment.ts --network kovan",
-    "frontend": "cd frontend && npm run start",
+    "deploy:frontend": "cd client && yarn react-app:deploy",
+    "start:frontend": "cd client && yarn react-app:start",
     "lint": "eslint --ext=.js,.jsx,.ts,.tsx .",
     "lint:fix": "eslint ---fix -ext=.js,.jsx,.ts,.tsx .",
     "node": "npx hardhat node --watch",
