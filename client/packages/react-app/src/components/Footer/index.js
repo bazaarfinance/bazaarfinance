@@ -1,6 +1,8 @@
 
 import React from 'react'
 import styled from 'styled-components'
+import { ImTwitter, ImGithub} from 'react-icons/im';
+
 
 const FooterFrame = styled.div`
   display: flex;
@@ -9,6 +11,14 @@ const FooterFrame = styled.div`
   width: 100vw;
   height: 10vh;
   background: ${({ theme }) => theme.headerFooterRed};
+`
+
+const IconTwitter = styled(ImTwitter)`
+  margin-left: 0.5rem;
+`
+
+const IconGithub = styled(ImGithub)`
+  margin-left: 0.5rem;
 `
 
 const ExternalLink = styled.a.attrs({
@@ -71,10 +81,10 @@ export default function Footer() {
             <h1 id="title">About</h1>
           </ExternalLink>
           <ExternalLink id="link" href="https://github.com/bazaarfinance/bazaarfinance">
-            <h1 id="title">Code</h1>
+            <h1 id="title">Code <IconGithub/> </h1>
           </ExternalLink>
           <ExternalLink id="link" href="https://twitter.com">
-            <h1 id="title">Twitter</h1>
+            <h1 id="title">Twitter <IconGithub/></h1>
           </ExternalLink>
         </Title>
       </FooterElement>
