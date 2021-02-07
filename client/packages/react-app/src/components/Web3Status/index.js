@@ -23,12 +23,12 @@ const Web3StatusGeneric = styled.button`
   }
 `
 const Web3StatusError = styled(Web3StatusGeneric)`
-  background-color: ${({ theme }) => theme.walletStatusOrange};
+  background-color: ${({ theme }) => theme.secondaryRed};
   color: ${({ theme }) => theme.black};
   font-weight: 500;
   :hover,
   :focus {
-    background-color: ${({ theme }) => theme.secondaryRed};
+    background-color: ${({ theme }) => theme.walletStatusOrange};
   }
 `
 
@@ -115,7 +115,7 @@ export default function Web3Status() {
           setActivatingConnector(injected)
           activate(injected) }}>
           <NetworkIcon />
-          <Text>{error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error'}</Text>
+          <Text>{error instanceof UnsupportedChainIdError ? 'Wrong Network: Please switch to Kovan' : 'Error'}</Text>
         </Web3StatusError>
       )
     } else {
