@@ -40,7 +40,7 @@ const FooterElement = styled.div`
 const Title = styled.div`
   display: flex;
   flex-direction: row;
-  font-family: Ubuntu;
+  font-family: Open Sans;
   justify-content: space-between;
   color: ${({ theme }) => theme.lightText};
   :hover {

@@ -60,8 +60,9 @@ const Title = styled.div`
   #title {
     display: inline;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-right: 25px;
+    font-family: Open Sans;
     color: ${({ theme }) => theme.lightText};
   }
   #navigation {

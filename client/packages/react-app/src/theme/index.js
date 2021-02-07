@@ -48,6 +48,10 @@ const theme = () => ({
     // reds
     primaryRed: '#9b3f3f',
     secondaryRed: '#d38f8f',
+    walletStatusOrange: '#F7C28E',
+
+    // blues
+    buttonBlue: '#414BB2',
 
     lightText: "#F9F8EB",
 

@@ -2,7 +2,7 @@
 // Goerli, Kovan, Rinkeby and Ropsten. Replace it with your smart contracts.
 const addresses = {
   // kovan
-  aDAI: "0xdCf0aF9e59C002FA3AA091a46196b37530FD48a8",
+  aDai: "0xdCf0aF9e59C002FA3AA091a46196b37530FD48a8",
   dai: "0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD",
   aavePool: "0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe",
   vaultFactory: "0xa75F7f9EBafF64a94eE777C2893065249376A2aE",

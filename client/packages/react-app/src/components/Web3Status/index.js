@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import truncate from 'truncate-middle';
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
 import { Activity } from 'react-feather'
 import { injected } from '../../connectors'
@@ -13,7 +14,7 @@ const Web3StatusGeneric = styled.button`
   font-size: 0.3rem;
   align-items: center;
   padding: 0.5rem;
-  border-radius: 2rem;
+  border-radius: 1.2rem;
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
@@ -22,9 +23,8 @@ const Web3StatusGeneric = styled.button`
   }
 `
 const Web3StatusError = styled(Web3StatusGeneric)`
-  background-color: #770e17;
-  border: 1px solid ${({ theme }) => theme.primaryRed};
-  color: ${({ theme }) => theme.lightText};
+  background-color: ${({ theme }) => theme.walletStatusOrange};
+  color: ${({ theme }) => theme.black};
   font-weight: 500;
   :hover,
   :focus {
@@ -33,9 +33,8 @@ const Web3StatusError = styled(Web3StatusGeneric)`
 `
 
 const Web3StatusConnect = styled(Web3StatusGeneric)`
-  background-color: #770e17;
-  border: 1px solid $${({ theme }) => theme.primaryRed};
-  color: ${({ theme }) => theme.lightText};
+  background-color: ${({ theme }) => theme.walletStatusOrange};
+  color: ${({ theme }) => theme.black};
   font-weight: 500;
   :hover,
   :focus {
@@ -44,10 +43,9 @@ const Web3StatusConnect = styled(Web3StatusGeneric)`
 `
 
 const Web3StatusConnected = styled(Web3StatusGeneric)`
-  background-color: #770e17;
-  border: 1px solid ${({ theme }) => theme.primaryRed};
-  color: ${({ theme }) => theme.lightText};
-  font-weight: 400;
+  background-color: ${({ theme }) => theme.walletStatusOrange};
+  color: ${({ theme }) => theme.black};
+  font-weight: 500;
   :hover {
     background-color: ${({ theme }) => theme.secondaryRed};
   }
@@ -63,14 +61,10 @@ const Text = styled.p`
   text-overflow: ellipsis;
   white-space: nowrap;
   margin: 0 0.5rem 0 0.25rem;
-  font-size: 0.83rem;
-`
-
-const Identicon = styled.div`
-  height: 1rem;
-  width: 1rem;
-  border-radius: 1.125rem;
-  background-color: ${({ theme }) => theme.secondaryRed};
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: Open Sans;
+  color: ${({ theme }) => theme.lightText};
 `
 
 const NetworkIcon = styled(Activity)`
@@ -111,7 +105,7 @@ export default function Web3Status() {
     if (account) {
       return (
         <Web3StatusConnected>
-          <Text>{account}</Text>
+          <Text>{truncate(account, 4, 4, '...')}</Text>
           {getStatusIcon()}
         </Web3StatusConnected>
       )

@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export const Jumbotron = styled.div`
     position: relative;
-    font-family: Ubuntu;
+    font-family: Open Sans;
     display: flex;
     flex-direction: row;
     width: 100vw;
@@ -20,8 +20,8 @@ export const JumbotronColumn = styled.div`
 
 export const MainHeader = styled.h1`
     color: ${({ theme }) => theme.primaryRed};  
-    font-family: Ubuntu;
-    font-weight: 600;
+    font-family: Open Sans;
+    font-weight: 800;
     font-size: 2.5rem;
     letter-spacing: 1px
 `
@@ -60,9 +60,9 @@ export const BorderlessInput = styled.input`
 `
 
 export const Button = styled.button`
-    background: ${({ theme }) => (theme.primaryRed)};
+    background: ${({ theme }) => (theme.buttonBlue)};
     color: ${({ theme }) => (theme.white)};
-    font-family: Ubuntu; 
+    font-family: Open Sans; 
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     border-radius: 7px;
     color: white;
