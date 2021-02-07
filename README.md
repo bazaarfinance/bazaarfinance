@@ -41,7 +41,7 @@ Example scenario:
 
 ## 🛠 Technology
 - The smart contract was built on Ethereum using [Hardhat Framework](https://hardhat.org/), [Open Zeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts), [Solidity](https://docs.soliditylang.org/en/v0.6.12/) and [TypeScript](https://www.typescriptlang.org/)
-- The client application was built with [React JS](https://reactjs.org/), [EthersJS](https://docs.ethers.io/v5/) and JavaScript (ES6)
+- The client application was built with [React JS](https://reactjs.org/), using [web3-react](https://github.com/NoahZinsmeister/web3-react), [create-eth-app](https://github.com/paulrberg/create-eth-app), [EthersJS](https://docs.ethers.io/v5/) and JavaScript (ES6)
 - Deposited funds accrue interest through the [AAVE Liquidity Protocol](https://aave.com/)
 - bTokens deployed for each recipient project adhere to the [ERC20 Token Standard](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.3.0/contracts/token/ERC20/IERC20.sol)
 
