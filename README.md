@@ -5,7 +5,7 @@
 
 Bazaar Finance allows developers to capture value for their work in open-source software though decentralized finance (DeFi) protocols. Thanks to lending protocols, users around the globe now have a new avenue to fund the open-source tools they find valuable. Not by dipping into their wallets, but via interest earned on their savings. Instead of having to actively give lump sums or set up recurring monthly donations, people can allocate a portion of interest they earn, passively and transparently, with the ability to withdraw their principle at any time.
 
-Bazaar gives OSS developers a recurring, predictable source of income for their work, and an avenue for depositors to earn yield on their savings after the recipinet goals have been met.
+Bazaar gives OSS developers a recurring, predictable source of income for their work, and an avenue for depositors to earn yield on their savings after the recipient goals have been met.
 
 **Depositors** pool their contributions towards an OSS project, and the interest earned on the total of deposits gets allocated to the developer that maintains it. This interest is withdrawable by the developer (the **recipient**) at any time. Any additional interest that is surplus to the recipient's stated desired **salary** gets reallocated to depositors.
 
@@ -29,8 +29,19 @@ Example scenario:
 
 \* The 1-1 exchange rate only applies to the initial deposit into the `Vault`. The exchange rate for a project's bToken is dynamic depending on how much has already been deposited into its `Vault`, which is why each project necessarily has its own `bToken` in addition to its own `Vault`. See the [bTokenExchangeRate](#bToken-Exchange-Rate) section for more info.
 
+### 🎒 Features
+- Interests accrued in real-time.
+- Interests earned on Depositors funds are proportional to the amount of deposits they have.
+- Depositors can deposit and withdraw the principal without a lock-up period 🔒
+- Recipient earns salary on a monthly basis.
+- Recipient can withdraw the salary at any point in time
+- Recipient's salary is accrued on a rolling basis and can be rolled over to the next month 📅
+- The contract runs autonomously without any operations required.
+- Supports contract upgrades via Proxy Pattern
+
 ## 🛠 Technology
-- This project was built on Ethereum using [Hardhat](https://hardhat.org/) and [Symfoni](https://github.com/symfoni/hardhat-react-boilerplate)
+- The smart contract was built on Ethereum using [Hardhat Framework](https://hardhat.org/), [Open Zeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts), [Solidity](https://docs.soliditylang.org/en/v0.6.12/) and [TypeScript](https://www.typescriptlang.org/)
+- The client application was built with [React JS](https://reactjs.org/), using [web3-react](https://github.com/NoahZinsmeister/web3-react), [create-eth-app](https://github.com/paulrberg/create-eth-app), [EthersJS](https://docs.ethers.io/v5/) and JavaScript (ES6)
 - Deposited funds accrue interest through the [AAVE Liquidity Protocol](https://aave.com/)
 - bTokens deployed for each recipient project adhere to the [ERC20 Token Standard](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.3.0/contracts/token/ERC20/IERC20.sol)
 
