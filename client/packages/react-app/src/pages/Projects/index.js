@@ -93,6 +93,7 @@ export function Projects() {
   const [daiAllowance, setDaiAllowance] = useState(0)
   const [bTokenAllowance, setBTokenAllowance] = useState(0)
   const [selectedProjectDepositorBalance, setSelectedProjectDepositorBalance] = useState(0)
+  const [selectedProjectRecipientAddress, setSelectedProjectRecipientAddress] = useState('')
         
   return (
     <>
@@ -120,12 +121,14 @@ export function Projects() {
                 const daiAllowance = await dai.allowance(account, addresses.vault);
                 const bTokenAllowance = await bToken.allowance(account, addresses.vault);
                 const depositorBalance = await vault.totalBalanceOf(account);
+                const recipientAddress = await vault.recipient();
                 setSelectedProjectSalary(salary);
                 setSelectedProjectBTokenBalance(bTokenBalance);
                 setSelectedProjectPrincipal(principal);
                 setSelectedProjectValueLocked(valueLocked);
                 setSelectedProjectRecipientReserve(recipientReserve);
                 setSelectedProjectDepositorBalance(depositorBalance);
+                setSelectedProjectRecipientAddress(recipientAddress);
                 setDaiAllowance(daiAllowance);
                 setBTokenAllowance(bTokenAllowance);
                 setProjectDetailsModalIsOpen(true);
@@ -143,6 +146,7 @@ export function Projects() {
               isOpen={projectDetailsModalIsOpen}
               daiAllowance={daiAllowance.toString()}
               bTokenAllowance={bTokenAllowance.toString()}
+              recipientAddress={selectedProjectRecipientAddress}
               onDismiss={() => setProjectDetailsModalIsOpen(false)} />
             : null }
         </JumbotronColumn>
