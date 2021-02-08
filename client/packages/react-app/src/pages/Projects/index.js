@@ -91,6 +91,7 @@ export function Projects() {
   const [selectedProjectPrincipal, setSelectedProjectPrincipal] = useState(0)
   const [selectedProjectValueLocked, setSelectedProjectValueLocked] = useState(0)
   const [daiAllowance, setDaiAllowance] = useState(0)
+  const [daiBalanceDepositor, setDaiBalanceDepositor] = useState(0)
   const [bTokenAllowance, setBTokenAllowance] = useState(0)
   const [selectedProjectDepositorBalance, setSelectedProjectDepositorBalance] = useState(0)
   const [selectedProjectRecipientAddress, setSelectedProjectRecipientAddress] = useState('')
@@ -119,6 +120,7 @@ export function Projects() {
                 const recipientReserve = await vault.recipientReserve();
                 const valueLocked = await aDai.balanceOf(addresses.vault);
                 const daiAllowance = await dai.allowance(account, addresses.vault);
+                const daiBalanceDepositor = await dai.balanceOf(account);
                 const bTokenAllowance = await bToken.allowance(account, addresses.vault);
                 const depositorBalance = await vault.totalBalanceOf(account);
                 const recipientAddress = await vault.recipient();
@@ -130,6 +132,7 @@ export function Projects() {
                 setSelectedProjectDepositorBalance(depositorBalance);
                 setSelectedProjectRecipientAddress(recipientAddress);
                 setDaiAllowance(daiAllowance);
+                setDaiBalanceDepositor(daiBalanceDepositor);
                 setBTokenAllowance(bTokenAllowance);
                 setProjectDetailsModalIsOpen(true);
             }}>View</Button>
@@ -145,6 +148,7 @@ export function Projects() {
               depositorBalance={ethers.utils.formatEther(selectedProjectDepositorBalance)}
               isOpen={projectDetailsModalIsOpen}
               daiAllowance={daiAllowance.toString()}
+              daiBalanceDepositor={ethers.utils.formatEther(daiBalanceDepositor)}
               bTokenAllowance={bTokenAllowance.toString()}
               recipientAddress={selectedProjectRecipientAddress}
               onDismiss={() => setProjectDetailsModalIsOpen(false)} />
