@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { FaBook, FaSignInAlt} from 'react-icons/fa'
 
 import bazaar from '../../assets/img/bazaar.png'
 
@@ -23,6 +24,14 @@ const StyledLink = styled(Link)`
   font-size: 0.9em;
   margin-left: 1rem;
   margin-right: 1rem;
+`
+
+const IconSignin = styled(FaSignInAlt)`
+  margin-left: 0.5rem;
+`
+
+const IconBook = styled(FaBook)`
+  margin-left: 0.5rem;
 `
 
 const ButtonsRow = styled.div`
@@ -55,8 +64,8 @@ export function Home() {
           <OneLiner>Scalable Continuous Financing for Open Source Projects via Altruistic Yield stable coins</OneLiner>
           <OneLiner>Allocate a fixed portion of monthly interest on your savings, earn on the rest</OneLiner>
           <ButtonsRow>
-            <StyledLink to={"/projects"}>Enter App</StyledLink>
-            <StyledLink to={"/projects"}>Read More</StyledLink>
+            <StyledLink to={"/projects"}>Enter App <IconSignin/></StyledLink>
+            <StyledLink to={"/projects"}>Read More <IconBook/></StyledLink>
           </ButtonsRow>
         </JumbotronColumn>
         <JumbotronColumn>
