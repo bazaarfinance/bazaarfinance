@@ -2,7 +2,7 @@ import { InjectedConnector } from '@web3-react/injected-connector'
 import { NetworkConnector } from './Network'
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 42]
+  supportedChainIds: [42]
 })
 
 const POLLING_INTERVAL = 10000
