@@ -84,7 +84,7 @@ export default function Footer() {
             <h1 id="title">Code <IconGithub/> </h1>
           </ExternalLink>
           <ExternalLink id="link" href="https://twitter.com">
-            <h1 id="title">Twitter <IconGithub/></h1>
+            <h1 id="title">Twitter <IconTwitter/></h1>
           </ExternalLink>
         </Title>
       </FooterElement>
